@@ -1,0 +1,16 @@
+{
+  "default_issue_type": "Task",
+  "label_to_issue_type": {
+    "bug": "Bug",
+    "frontend": "Task",
+    "backend": "Task",
+    "ops": "Task",
+    "doc": "Task"
+  },
+  "components": {
+    "frontend": "WebApp",
+    "backend": "API",
+    "ops": "Ops",
+    "social": "Marketing"
+  }
+}
