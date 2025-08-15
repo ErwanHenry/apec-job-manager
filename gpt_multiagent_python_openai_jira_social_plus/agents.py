@@ -3,7 +3,11 @@ from typing import Any, Dict, Literal
 from pydantic import ValidationError
 from schemas import ProductSpec, OpsPackage, AccommodationPlan, SocialPlan, ErrorEnvelope
 from prompts import KCT_PRODUCT_BUILDER, BLABLAKAS_OPS, KASCOMODATION_OPS, KCT_SOCIAL_MANAGER
-from openai_llm import generate_and_validate
+# Import conditionnel pour Vercel
+try:
+    from openai_llm import generate_and_validate
+except ImportError:
+    from openai_llm_vercel import generate_and_validate
 
 AgentName = Literal["product_builder","blablakas_ops","kascomodation_ops","social_manager"]
 
