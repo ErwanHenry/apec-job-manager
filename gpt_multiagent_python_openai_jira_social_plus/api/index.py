@@ -6,6 +6,11 @@ from pydantic import BaseModel
 from typing import Any, Dict
 import os
 
+# Import avec path parent pour Vercel
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # Import conditionnel pour éviter les erreurs de dépendances
 try:
     from agents import AGENTS
