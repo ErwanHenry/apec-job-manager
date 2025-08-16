@@ -1,18 +1,31 @@
-from http.server import BaseHTTPRequestHandler
-import json
-
-class handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        
-        response = {
-            "status": "healthy",
-            "service": "kaspa-community-tool",
-            "platform": "vercel",
-            "timestamp": "2024-03-20T10:00:00Z"
-        }
-        
-        self.wfile.write(json.dumps(response).encode('utf-8'))
+def handler(request):
+    import json
+    from datetime import datetime, timezone
+    
+    headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    }
+    
+    response_data = {
+        "status": "healthy",
+        "service": "kaspa-community-tool", 
+        "platform": "vercel",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "version": "0.3.0",
+        "endpoints_available": [
+            "/api/",
+            "/api/health", 
+            "/api/route",
+            "/api/blablakas",
+            "/api/kascomodation",
+            "/api/social", 
+            "/api/product"
+        ]
+    }
+    
+    return {
+        'statusCode': 200,
+        'headers': headers,
+        'body': json.dumps(response_data, ensure_ascii=False)
+    }
