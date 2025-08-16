@@ -17,6 +17,9 @@
     },
     "api/product.py": {
       "runtime": "@vercel/python"
+    },
+    "api/route.py": {
+      "runtime": "@vercel/python"
     }
   }
 }

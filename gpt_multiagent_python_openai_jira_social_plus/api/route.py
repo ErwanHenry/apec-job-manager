@@ -1,66 +1,60 @@
-def handler(request):
-    import json
-    import urllib.parse
-    
-    headers = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-    }
-    
-    # Simuler routage intelligent basé sur mots-clés
-    # En production, on analyserait le body de la requête POST
-    
-    # Mots-clés pour chaque agent
-    keywords = {
-        "blablakas_ops": ["faq", "support", "incident", "blablakas", "covoiturage", "trajet", "conducteur"],
-        "kascomodation_ops": ["réservation", "hébergement", "kascomodation", "logement", "appartement", "maison"],
-        "social_manager": ["post", "social", "tweet", "campagne", "linkedin", "communication", "marketing"],
-        "product_builder": ["feature", "fonctionnalité", "développement", "spécification", "produit", "amélioration"]
-    }
-    
-    # Exemple de routage (normalement basé sur l'input utilisateur)
-    example_routes = [
-        {
-            "input_example": "Créer une FAQ pour les annulations BlablaKAS",
-            "agent": "blablakas_ops",
-            "confidence": 0.95,
-            "reasoning": "Mots-clés détectés: FAQ, annulations, BlablaKAS"
-        },
-        {
-            "input_example": "Planifier des réservations pour Berlin",
-            "agent": "kascomodation_ops", 
-            "confidence": 0.92,
-            "reasoning": "Mots-clés détectés: planifier, réservations, hébergement"
-        },
-        {
-            "input_example": "Campagne social media pour nouveau feature",
-            "agent": "social_manager",
-            "confidence": 0.88,
-            "reasoning": "Mots-clés détectés: campagne, social media, communication"
-        },
-        {
-            "input_example": "Spécifier un système de notation",
-            "agent": "product_builder",
-            "confidence": 0.90,
-            "reasoning": "Mots-clés détectés: spécifier, système, développement"
+from http.server import BaseHTTPRequestHandler
+import json
+
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        
+        response = {
+            "service": "intelligent_routing",
+            "status": "operational",
+            "description": "Routes user requests to the appropriate Kaspa community agent",
+            "available_agents": [
+                "blablakas_ops",
+                "kascomodation_ops", 
+                "social_manager",
+                "product_builder"
+            ],
+            "routing_examples": [
+                {
+                    "input_example": "Créer une FAQ pour les annulations BlablaKAS",
+                    "agent": "blablakas_ops",
+                    "confidence": 0.95,
+                    "reasoning": "Keywords detected: FAQ, annulations, BlablaKAS"
+                },
+                {
+                    "input_example": "Planifier des réservations d'hébergement pour Berlin",
+                    "agent": "kascomodation_ops",
+                    "confidence": 0.92, 
+                    "reasoning": "Keywords detected: planifier, réservations, hébergement"
+                },
+                {
+                    "input_example": "Campagne social media pour nouveau feature Kaspa",
+                    "agent": "social_manager",
+                    "confidence": 0.88,
+                    "reasoning": "Keywords detected: campagne, social media, communication"
+                },
+                {
+                    "input_example": "Spécifier un système de notation communautaire",
+                    "agent": "product_builder",
+                    "confidence": 0.90,
+                    "reasoning": "Keywords detected: spécifier, système, développement"
+                }
+            ],
+            "usage": {
+                "method": "POST",
+                "endpoint": "/api/route",
+                "body_format": {"text": "your request here"},
+                "response_format": {"agent": "agent_name", "confidence": 0.95}
+            }
         }
-    ]
+        
+        self.wfile.write(json.dumps(response, ensure_ascii=False).encode('utf-8'))
     
-    response_data = {
-        "service": "intelligent_routing",
-        "status": "operational",
-        "available_agents": list(keywords.keys()),
-        "routing_examples": example_routes,
-        "usage": {
-            "method": "POST",
-            "endpoint": "/api/route",
-            "body": {"text": "votre demande ici"},
-            "response": {"agent": "nom_agent", "confidence": 0.95}
-        }
-    }
-    
-    return {
-        'statusCode': 200,
-        'headers': headers,
-        'body': json.dumps(response_data, ensure_ascii=False)
-    }
+    def do_POST(self):
+        # In a real implementation, we would parse the POST body
+        # and perform intelligent routing based on the text content
+        self.do_GET()
