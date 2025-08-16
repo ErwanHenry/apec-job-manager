@@ -5,6 +5,7 @@ pydantic==2.8.2
 python-dotenv==1.0.1
 httpx==0.27.0
 openai==1.40.6
+mangum==0.17.0
 
 # Local development dependencies (too heavy for Vercel)
 # scikit-learn==1.5.1

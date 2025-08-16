@@ -35,4 +35,5 @@ def health():
     }
 
 # Export for Vercel
-handler = app
+from mangum import Mangum
+handler = Mangum(app)
