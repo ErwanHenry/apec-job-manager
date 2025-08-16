@@ -1,15 +1,22 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "vercel_app.py",
-      "use": "@vercel/python"
+  "functions": {
+    "api/index.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/health.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/blablakas.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/kascomodation.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/social.py": {
+      "runtime": "@vercel/python"
+    },
+    "api/product.py": {
+      "runtime": "@vercel/python"
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "vercel_app.py"
-    }
-  ]
+  }
 }

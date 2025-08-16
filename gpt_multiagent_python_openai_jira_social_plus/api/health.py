@@ -1,31 +1,23 @@
-def handler(request):
+def app(environ, start_response):
+    """Health check endpoint"""
     import json
     from datetime import datetime, timezone
     
-    headers = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-    }
-    
-    response_data = {
+    data = {
         "status": "healthy",
-        "service": "kaspa-community-tool", 
-        "platform": "vercel",
+        "service": "kaspa-community-tool",
+        "platform": "vercel", 
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": "0.3.0",
-        "endpoints_available": [
-            "/api/",
-            "/api/health", 
-            "/api/route",
-            "/api/blablakas",
-            "/api/kascomodation",
-            "/api/social", 
-            "/api/product"
-        ]
+        "version": "0.3.0"
     }
     
-    return {
-        'statusCode': 200,
-        'headers': headers,
-        'body': json.dumps(response_data, ensure_ascii=False)
-    }
+    response_body = json.dumps(data).encode('utf-8')
+    
+    status = '200 OK'
+    headers = [
+        ('Content-Type', 'application/json'),
+        ('Access-Control-Allow-Origin', '*')
+    ]
+    
+    start_response(status, headers)
+    return [response_body]
