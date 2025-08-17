@@ -1,13 +1,16 @@
 {
-  "functions": {
-    "index.py": {
-      "runtime": "@vercel/python"
-    }
-  },
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/index.py"
+      "source": "/",
+      "destination": "/api/main"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/health"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     }
   ]
 }
