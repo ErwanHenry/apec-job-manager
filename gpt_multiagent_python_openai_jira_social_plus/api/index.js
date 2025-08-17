@@ -1,6 +1,4 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
-
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'application/json');
 
@@ -9,14 +7,13 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     version: "0.4.0",
     status: "operational", 
     platform: "vercel",
-    runtime: "typescript",
+    runtime: "node.js",
     services: ["BlablaKAS", "KAScomodation"],
     github: "https://github.com/ErwanHenry/kaspa-community-tool",
     endpoints: {
       health: "/api/health",
       social: "/api/social",
-      route: "/api/route", 
-      product: "/api/product"
+      route: "/api/route"
     }
   };
 

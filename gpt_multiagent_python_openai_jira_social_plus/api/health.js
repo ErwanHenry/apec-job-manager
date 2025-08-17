@@ -1,6 +1,4 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
-
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'application/json');
 
@@ -8,10 +6,9 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     status: "healthy",
     service: "kaspa-community-tool",
     platform: "vercel",
-    runtime: "typescript",
+    runtime: "node.js",
     timestamp: new Date().toISOString(),
-    version: "0.4.0",
-    uptime: "operational"
+    version: "0.4.0"
   };
 
   res.status(200).json(response);
