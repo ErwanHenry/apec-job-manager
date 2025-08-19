@@ -130,6 +130,9 @@ function setupEventListeners() {
     // Clear CRM
     document.getElementById('clearCRM').addEventListener('click', clearCRM);
     
+    // Remove duplicates
+    document.getElementById('removeDuplicates').addEventListener('click', removeDuplicates);
+    
     // Export data
     document.getElementById('exportData').addEventListener('click', exportData);
     
@@ -563,6 +566,34 @@ async function authenticateGoogle() {
 }
 
 // Clear CRM data
+// Remove duplicates from CRM
+async function removeDuplicates() {
+    if (!confirm('Remove duplicate prospects from CRM? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        updateStatus('🔄 Removing duplicates...', 'info');
+        
+        const response = await fetch(`${API_URL}/prospects/remove-duplicates`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            updateStatus(`✅ Removed ${data.removed} duplicate(s) from CRM`, 'success');
+            // Refresh prospects table
+            loadProspects();
+        } else {
+            updateStatus('❌ Failed to remove duplicates', 'error');
+        }
+    } catch (error) {
+        console.error('Remove duplicates error:', error);
+        updateStatus('❌ Remove duplicates failed', 'error');
+    }
+}
+
 async function clearCRM() {
     if (!confirm('Are you sure you want to clear all CRM data? This cannot be undone.')) {
         return;

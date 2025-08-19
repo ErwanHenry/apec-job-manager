@@ -6,6 +6,7 @@ require('dotenv').config();
 const linkedinRoutes = require('./routes/linkedin');
 const googleSheets = require('./services/googleSheets');
 const automationService = require('./services/automationService');
+const emailNotificationService = require('./services/emailNotificationService');
 const { logEnvironmentStatus, getSystemInfo } = require('./utils/validation');
 const logger = require('./utils/logger');
 
@@ -454,6 +455,241 @@ app.get('/api/logs', (req, res) => {
     total: logs.length,
     timestamp: new Date().toISOString()
   });
+});
+
+// Remove duplicates from CRM
+app.post('/api/prospects/remove-duplicates', async (req, res) => {
+  try {
+    const initialized = await googleSheets.initialize();
+    if (!initialized) {
+      return res.status(500).json({ error: 'Google Sheets not initialized' });
+    }
+
+    const data = await googleSheets.getSheetData();
+    if (!data || data.length <= 1) {
+      return res.json({ success: true, removed: 0, message: 'No data to process' });
+    }
+
+    const headers = data[0];
+    const prospects = data.slice(1);
+    
+    // Find duplicates based on LinkedIn URL or Name+Company combination
+    const seen = new Set();
+    const duplicateIndices = [];
+    
+    prospects.forEach((row, index) => {
+      const linkedinUrl = row[4]?.trim() || '';
+      const name = row[1]?.trim() || '';
+      const company = row[2]?.trim() || '';
+      
+      // Create unique identifier
+      let identifier = '';
+      if (linkedinUrl) {
+        identifier = linkedinUrl.toLowerCase();
+      } else if (name && company) {
+        identifier = `${name.toLowerCase()}_${company.toLowerCase()}`;
+      } else {
+        identifier = `${name.toLowerCase()}_${index}`; // Fallback with index
+      }
+      
+      if (seen.has(identifier)) {
+        duplicateIndices.push(index + 2); // +2 because of header row and 1-based indexing
+      } else {
+        seen.add(identifier);
+      }
+    });
+    
+    if (duplicateIndices.length === 0) {
+      return res.json({ success: true, removed: 0, message: 'No duplicates found' });
+    }
+    
+    // Remove duplicates by clearing rows (from bottom to top to avoid index issues)
+    duplicateIndices.sort((a, b) => b - a); // Descending order
+    
+    for (const rowIndex of duplicateIndices) {
+      const range = `A${rowIndex}:K${rowIndex}`;
+      await googleSheets.sheets.spreadsheets.values.clear({
+        spreadsheetId: googleSheets.spreadsheetId,
+        range,
+      });
+    }
+    
+    logger.info(`Removed ${duplicateIndices.length} duplicate prospects from CRM`, {
+      component: 'CRM',
+      duplicatesRemoved: duplicateIndices.length,
+      totalProspects: prospects.length
+    });
+    
+    res.json({
+      success: true,
+      removed: duplicateIndices.length,
+      totalProspects: prospects.length,
+      message: `Removed ${duplicateIndices.length} duplicate(s) from CRM`
+    });
+  } catch (error) {
+    logger.error('Failed to remove duplicates', {
+      component: 'CRM',
+      error: error.message
+    });
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Full workflow sequence with email notifications
+app.post('/api/workflow/run-full-sequence', async (req, res) => {
+  const workflowId = `workflow_${Date.now()}`;
+  const startTime = Date.now();
+  let workflowLogs = [];
+  
+  try {
+    const { prospects, config } = req.body;
+    
+    if (!prospects || !Array.isArray(prospects) || prospects.length === 0) {
+      return res.status(400).json({ error: 'Prospects array is required' });
+    }
+    
+    // Log workflow start
+    workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 🚀 Workflow démarré avec ${prospects.length} prospects`);
+    workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ⚙️ Configuration: emails=${config?.actions?.generateEmails}, linkedin=${config?.actions?.sendLinkedInConnections}, followups=${config?.actions?.scheduleFollowups}`);
+    
+    // Send workflow start notification
+    await emailNotificationService.sendWorkflowStartNotification({
+      prospects,
+      config,
+      workflowId
+    });
+    
+    const results = {
+      workflowId,
+      prospectsProcessed: 0,
+      emailsGenerated: 0,
+      linkedinConnections: 0,
+      followupsScheduled: 0,
+      errors: [],
+      warnings: [],
+      logs: workflowLogs.join('\n')
+    };
+    
+    // Process each prospect
+    for (let i = 0; i < prospects.length; i++) {
+      const prospect = prospects[i];
+      workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 👤 Traitement de ${prospect.name} (${i + 1}/${prospects.length})`);
+      
+      try {
+        // Generate email if requested
+        if (config?.actions?.generateEmails) {
+          try {
+            const emailResult = await automationService.generatePersonalizedEmail(prospect);
+            if (emailResult.success) {
+              results.emailsGenerated++;
+              workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ✅ Email généré pour ${prospect.name}`);
+            } else {
+              results.warnings.push(`Failed to generate email for ${prospect.name}`);
+              workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ⚠️ Échec génération email pour ${prospect.name}`);
+            }
+          } catch (error) {
+            results.errors.push(`Email generation error for ${prospect.name}: ${error.message}`);
+            workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ❌ Erreur email pour ${prospect.name}: ${error.message}`);
+          }
+        }
+        
+        // Send LinkedIn connection if requested
+        if (config?.actions?.sendLinkedInConnections && prospect.linkedinUrl) {
+          try {
+            const connectionResult = await automationService.sendLinkedInConnection({
+              profileUrl: prospect.linkedinUrl,
+              message: config.linkedinTemplate || 'Hello, I would like to connect with you.'
+            });
+            if (connectionResult.success) {
+              results.linkedinConnections++;
+              workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 🔗 Connexion LinkedIn envoyée à ${prospect.name}`);
+            } else {
+              results.warnings.push(`Failed to send LinkedIn connection to ${prospect.name}`);
+              workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ⚠️ Échec connexion LinkedIn pour ${prospect.name}`);
+            }
+          } catch (error) {
+            results.errors.push(`LinkedIn connection error for ${prospect.name}: ${error.message}`);
+            workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ❌ Erreur connexion LinkedIn pour ${prospect.name}: ${error.message}`);
+          }
+        }
+        
+        // Schedule follow-up if requested
+        if (config?.actions?.scheduleFollowups) {
+          try {
+            const followupResult = await automationService.scheduleFollowUp({
+              prospectId: prospect.id || prospect.name,
+              prospectName: prospect.name,
+              prospectEmail: prospect.email,
+              scheduledDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+              message: config.followupTemplate || 'Following up on our previous conversation.'
+            });
+            if (followupResult.success) {
+              results.followupsScheduled++;
+              workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 📅 Relance programmée pour ${prospect.name}`);
+            } else {
+              results.warnings.push(`Failed to schedule follow-up for ${prospect.name}`);
+              workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ⚠️ Échec programmation relance pour ${prospect.name}`);
+            }
+          } catch (error) {
+            results.errors.push(`Follow-up scheduling error for ${prospect.name}: ${error.message}`);
+            workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ❌ Erreur programmation relance pour ${prospect.name}: ${error.message}`);
+          }
+        }
+        
+        results.prospectsProcessed++;
+        
+        // Add small delay between prospects to avoid rate limiting
+        if (i < prospects.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      } catch (error) {
+        results.errors.push(`Error processing ${prospect.name}: ${error.message}`);
+        workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ❌ Erreur traitement ${prospect.name}: ${error.message}`);
+      }
+    }
+    
+    const endTime = Date.now();
+    results.duration = endTime - startTime;
+    results.logs = workflowLogs.join('\n');
+    
+    workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 🎯 Workflow terminé - ${results.prospectsProcessed} prospects traités`);
+    workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 📊 Résultats: ${results.emailsGenerated} emails, ${results.linkedinConnections} connexions, ${results.followupsScheduled} relances`);
+    
+    // Send workflow end notification
+    await emailNotificationService.sendWorkflowEndNotification(results);
+    
+    res.json({
+      success: true,
+      results
+    });
+  } catch (error) {
+    const errorResults = {
+      workflowId,
+      prospectsProcessed: 0,
+      emailsGenerated: 0,
+      linkedinConnections: 0,
+      followupsScheduled: 0,
+      errors: [error.message],
+      warnings: [],
+      logs: workflowLogs.join('\n'),
+      duration: Date.now() - startTime
+    };
+    
+    // Send error notification
+    await emailNotificationService.sendErrorNotification(error, 'Workflow execution');
+    
+    logger.error('Workflow execution failed', {
+      component: 'Workflow',
+      error: error.message,
+      workflowId
+    });
+    
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      results: errorResults
+    });
+  }
 });
 
 // Clear logs endpoint
