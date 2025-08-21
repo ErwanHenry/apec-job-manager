@@ -1,6 +1,13 @@
 # 🚀 Kaspa Community Tool
 
-Un orchestrateur multi-agents IA pour la communauté Kaspa, intégrant **BlablaKAS** (covoiturage) et **KAScomodation** (hébergement).
+> **Plateforme IA Multi-Agents pour l'Écosystème Kaspa**  
+> Développez, gérez et faites grandir vos services communautaires avec l'intelligence artificielle
+
+[![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)](https://github.com/ErwanHenry/kaspa-community-tool/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.112.2-teal.svg)](https://fastapi.tiangolo.com)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-orange.svg)](https://openai.com)
 
 ## ✨ Fonctionnalités
 
@@ -114,11 +121,15 @@ Frontend/API → Router → Agent → OpenAI + RAG → Response
               Scheduler (SQLite + APScheduler)
 ```
 
-## 📚 Documentation
+## 📚 Documentation Complète
 
-- **Guide détaillé** : `DETAILED_GUIDELINES.md`
-- **Système RAG** : Dossier `rag/` avec guides spécialisés
-- **Configuration Jira** : `config/jira_mapping.json`
+| Document | Description | Lien |
+|----------|-------------|------|
+| 📋 **Architecture & Overview** | Vue d'ensemble, installation, structure projet | [docs/README.md](docs/README.md) |
+| 🔌 **API Documentation** | Endpoints, authentification, exemples complets | [docs/API.md](docs/API.md) |
+| 🚀 **Deployment Guide** | Local, staging, production (Vercel, AWS, Docker) | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
+| 🤖 **Agents Documentation** | Guide détaillé des 4 agents et leurs capacités | [docs/AGENTS.md](docs/AGENTS.md) |
+| 👥 **User Guide** | Guide utilisateur avec cas d'usage concrets | [docs/USER_GUIDE.md](docs/USER_GUIDE.md) |
 
 ## 🚀 Déploiement
 
