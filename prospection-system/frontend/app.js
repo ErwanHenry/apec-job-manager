@@ -124,6 +124,9 @@ function setupEventListeners() {
     document.getElementById('refreshHealth').addEventListener('click', checkSystemHealth);
     document.getElementById('refreshProspects').addEventListener('click', loadProspects);
     
+    // Find Emails button
+    document.getElementById('findEmailsBtn').addEventListener('click', findEmailsForProspects);
+    
     // Authenticate Google
     document.getElementById('authenticateGoogle').addEventListener('click', authenticateGoogle);
     
@@ -153,19 +156,22 @@ async function checkSystemHealth() {
         const response = await fetch(`${API_URL}/health`);
         const health = await response.json();
         
-        // Update status indicators
-        updateStatusIndicator('google', health.googleSheets === 'connected');
-        updateStatusIndicator('linkedin', health.linkedin === 'ready');
+        // Update status indicators  
+        const googleStatus = health.services?.googleSheets?.status === 'connected';
+        const linkedinStatus = health.services?.automation?.status === 'active';
+        
+        updateStatusIndicator('google', googleStatus);
+        updateStatusIndicator('linkedin', linkedinStatus);
         
         // Update health display
         systemHealth.innerHTML = `
             <div class="health-item">
-                <span class="health-dot ${health.googleSheets === 'connected' ? 'green' : 'red'}"></span>
-                Google Sheets: ${health.googleSheets}
+                <span class="health-dot ${googleStatus ? 'green' : 'red'}"></span>
+                Google Sheets: ${health.services?.googleSheets?.status || 'unknown'}
             </div>
             <div class="health-item">
-                <span class="health-dot ${health.linkedin === 'ready' ? 'green' : 'yellow'}"></span>
-                LinkedIn: ${health.linkedin}
+                <span class="health-dot ${linkedinStatus ? 'green' : 'yellow'}"></span>
+                LinkedIn: ${linkedinStatus ? 'ready' : 'inactive'}
             </div>
             <div class="health-item">
                 <span class="health-dot green"></span>
@@ -173,7 +179,7 @@ async function checkSystemHealth() {
             </div>
         `;
         
-        if (health.googleSheets === 'connected') {
+        if (health.services?.googleSheets?.status === 'connected') {
             updateStatus('✅ System is ready!', 'success');
         } else {
             updateStatus('⚠️ Google Sheets not connected - authentication required', 'warning');
@@ -398,8 +404,8 @@ async function loadProspects() {
         const response = await fetch(`${API_URL}/prospects`);
         const data = await response.json();
         
-        if (data.success && data.prospects && data.prospects.length > 0) {
-            currentProspects = data.prospects.filter(prospect => 
+        if (data.success && data.data && data.data.length > 0) {
+            currentProspects = data.data.filter(prospect => 
                 prospect.name && prospect.name.trim() !== '' && prospect.name !== 'Nom non spécifié'
             );
             
@@ -649,6 +655,107 @@ async function exportData() {
     window.URL.revokeObjectURL(url);
     
     updateStatus('✅ Data exported successfully', 'success');
+}
+
+// Find emails for prospects
+async function findEmailsForProspects() {
+    console.log('🔍 findEmailsForProspects called');
+    console.log('🔍 selectedProspects:', selectedProspects);
+    console.log('🔍 selectedProspects.length:', selectedProspects.length);
+    
+    // Use selected prospects, or first 10 prospects if none selected for testing
+    let prospectsToProcess = selectedProspects.length > 0 ? selectedProspects : currentProspects.slice(0, 10);
+    
+    if (prospectsToProcess.length === 0) {
+        updateStatus('❌ No prospects available', 'error');
+        return;
+    }
+    
+    console.log('🔍 Processing prospects:', prospectsToProcess.length);
+    
+    const button = document.getElementById('findEmailsBtn');
+    const originalText = button.textContent;
+    
+    try {
+        button.textContent = '🔍 Finding Emails...';
+        button.disabled = true;
+        
+        updateStatus(`🔍 Finding emails for ${prospectsToProcess.length} prospects...`, 'info');
+        
+        let foundCount = 0;
+        let errorCount = 0;
+        
+        // Process prospects in batches to avoid overwhelming the server
+        const batchSize = 5;
+        for (let i = 0; i < prospectsToProcess.length; i += batchSize) {
+            const batch = prospectsToProcess.slice(i, i + batchSize);
+            
+            // Process batch in parallel
+            const promises = batch.map(async (prospect) => {
+                try {
+                    const url = `${API_URL}/prospects/${prospect.id}/find-email`;
+                    console.log(`🔍 Calling email API for ${prospect.name}: ${url}`);
+                    
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        console.error(`❌ HTTP Error ${response.status} for ${prospect.name}: ${response.statusText}`);
+                        throw new Error(`Endpoint non trouvé`);
+                    }
+                    
+                    const result = await response.json();
+                    console.log(`📧 API Response for ${prospect.name}:`, result);
+                    
+                    if (result.success && result.email) {
+                        foundCount++;
+                        // Update the prospect in our local array
+                        const prospectIndex = currentProspects.findIndex(p => p.id === prospect.id);
+                        if (prospectIndex !== -1) {
+                            currentProspects[prospectIndex].email = result.email;
+                        }
+                        console.log(`✅ Email found for ${prospect.name}: ${result.email}`);
+                    } else {
+                        console.log(`❌ No email found for ${prospect.name}`);
+                    }
+                } catch (error) {
+                    errorCount++;
+                    console.error(`Error finding email for ${prospect.name}:`, error);
+                }
+            });
+            
+            await Promise.all(promises);
+            
+            // Update progress
+            const processed = Math.min(i + batchSize, prospectsToProcess.length);
+            button.textContent = `🔍 Progress: ${processed}/${prospectsToProcess.length}`;
+            
+            // Small delay between batches
+            if (i + batchSize < prospectsToProcess.length) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+        
+        // Refresh the prospects table to show new emails
+        await loadProspects();
+        
+        if (foundCount > 0) {
+            updateStatus(`✅ Found ${foundCount} emails! ${errorCount > 0 ? `(${errorCount} failed)` : ''}`, 'success');
+        } else {
+            updateStatus(`❌ No emails found for selected prospects`, 'warning');
+        }
+        
+    } catch (error) {
+        console.error('Email finding failed:', error);
+        updateStatus('❌ Email finding failed - check logs', 'error');
+    } finally {
+        button.textContent = originalText;
+        button.disabled = false;
+    }
 }
 
 // Utility functions

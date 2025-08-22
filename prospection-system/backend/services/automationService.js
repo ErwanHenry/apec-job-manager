@@ -9,6 +9,7 @@ const nodemailer = require('nodemailer');
 const fs = require('fs').promises;
 const path = require('path');
 const linkedinProfileExtractor = require('./linkedinProfileExtractor');
+const linkedinAutomation = require('./linkedinAutomation');
 
 // Configuration Puppeteer avec Stealth
 puppeteer.use(StealthPlugin());
@@ -40,21 +41,34 @@ class AutomationService {
   }
 
   async initializeEmailTransporter() {
-    // Configuration Gmail (ou autre service SMTP)
-    this.emailTransporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD // App password, pas le mot de passe normal
-      }
-    });
-
-    // Test de la connexion
-    try {
-      await this.emailTransporter.verify();
-      console.log('✅ Email transporter configuré');
-    } catch (error) {
+    // Vérifier que les credentials Gmail sont configurés
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
       console.log('⚠️ Email non configuré (ajoutez GMAIL_USER et GMAIL_APP_PASSWORD dans .env)');
+      this.emailTransporter = null;
+      return;
+    }
+
+    try {
+      // Configuration Gmail (ou autre service SMTP)
+      this.emailTransporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD // App password, pas le mot de passe normal
+        }
+      });
+
+      // Test de la connexion seulement si les credentials sont présents
+      await this.emailTransporter.verify();
+      console.log('✅ Email transporter configuré avec succès');
+      
+    } catch (error) {
+      console.error('❌ Erreur configuration email transporter:', error.message);
+      console.log('💡 Vérifiez vos credentials Gmail:');
+      console.log('   1. GMAIL_USER: votre adresse Gmail');
+      console.log('   2. GMAIL_APP_PASSWORD: mot de passe d\'application (pas votre mot de passe normal)');
+      console.log('   3. Guide: https://support.google.com/accounts/answer/185833');
+      this.emailTransporter = null;
     }
   }
 
@@ -62,62 +76,100 @@ class AutomationService {
 
   async sendLinkedInConnection(data) {
     try {
-      const { prospectId, linkedinUrl, name, title, company } = data;
+      const { prospectId, linkedinUrl, name, title, company, message } = data;
       
-      console.log(`🔗 Envoi connexion LinkedIn à ${name}...`);
+      if (!linkedinUrl || !linkedinUrl.includes('linkedin.com')) {
+        throw new Error('Invalid LinkedIn URL');
+      }
       
-      // Pour le moment, simulation (implémentation réelle nécessiterait l'automatisation LinkedIn)
-      await this.simulateDelay(2000, 5000);
+      console.log(`🔗 Envoi connexion LinkedIn RÉELLE à ${name}...`);
       
-      // Ici vous pourriez intégrer :
-      // - LinkedIn API (si disponible)
-      // - Puppeteer automation avec LinkedIn
-      // - Webhook vers un service tiers
+      // Initialize LinkedIn automation if not already done
+      if (!linkedinAutomation.isLoggedIn) {
+        console.log('🔐 Initialisation LinkedIn automation...');
+        const initialized = await linkedinAutomation.initialize();
+        if (!initialized) {
+          throw new Error('Failed to initialize LinkedIn automation');
+        }
+      }
       
-      console.log(`✅ Connexion LinkedIn envoyée à ${name}`);
+      // Create personalized connection message if none provided
+      const connectionMessage = message || this.createConnectionMessage(name, title, company);
+      
+      // Send actual connection request
+      const result = await linkedinAutomation.sendConnectionRequest(linkedinUrl, connectionMessage);
+      
+      console.log(`✅ Connexion LinkedIn RÉELLE envoyée à ${name}`);
       
       return {
-        success: true,
-        message: `Connection request sent to ${name} at ${company}`,
+        success: result.success,
+        message: `Real connection request sent to ${name} at ${company}`,
         prospectId: prospectId,
         action: 'linkedin-connection',
-        timestamp: new Date().toISOString()
+        dailyCount: result.dailyCount,
+        timestamp: result.timestamp,
+        linkedinUrl: linkedinUrl
       };
       
     } catch (error) {
-      console.error('❌ Erreur connexion LinkedIn:', error.message);
+      console.error('❌ Erreur connexion LinkedIn RÉELLE:', error.message);
       throw error;
     }
+  }
+  
+  createConnectionMessage(name, title, company) {
+    const templates = [
+      `Hi ${name}, I'd love to connect and learn more about your work as ${title} at ${company}.`,
+      `Hello ${name}, I'm interested in connecting with ${title} professionals. Would love to exchange insights!`,
+      `Hi ${name}, I came across your profile and would like to connect. Always interested in learning from ${title} experts.`,
+      `Hello ${name}, I'd like to add you to my professional network. Looking forward to connecting!`
+    ];
+    
+    // Return a random template, but truncate to LinkedIn's 300 character limit
+    const template = templates[Math.floor(Math.random() * templates.length)];
+    return template.length > 300 ? template.substring(0, 297) + '...' : template;
   }
 
   async sendLinkedInMessage(data) {
     try {
       const { prospectId, linkedinUrl, message, name } = data;
       
-      console.log(`💬 Envoi message LinkedIn à ${name}...`);
+      if (!linkedinUrl || !linkedinUrl.includes('linkedin.com')) {
+        throw new Error('Invalid LinkedIn URL');
+      }
       
-      // Simulation pour le moment
-      await this.simulateDelay(1500, 3000);
+      console.log(`💬 Envoi message LinkedIn RÉEL à ${name}...`);
       
-      console.log(`✅ Message LinkedIn envoyé à ${name}`);
+      // Initialize LinkedIn automation if not already done
+      if (!linkedinAutomation.isLoggedIn) {
+        const initialized = await linkedinAutomation.initialize();
+        if (!initialized) {
+          throw new Error('Failed to initialize LinkedIn automation');
+        }
+      }
+      
+      // Send actual LinkedIn message
+      const result = await linkedinAutomation.sendMessage(linkedinUrl, message);
+      
+      console.log(`✅ Message LinkedIn RÉEL envoyé à ${name}`);
       
       return {
-        success: true,
-        message: `LinkedIn message sent to ${name}`,
+        success: result.success,
+        message: `Real LinkedIn message sent to ${name}`,
         prospectId: prospectId,
         action: 'linkedin-message',
-        timestamp: new Date().toISOString()
+        timestamp: result.timestamp
       };
       
     } catch (error) {
-      console.error('❌ Erreur message LinkedIn:', error.message);
+      console.error('❌ Erreur message LinkedIn RÉEL:', error.message);
       throw error;
     }
   }
 
   // === EMAIL AUTOMATION ===
 
-  async generatePersonalizedEmail(prospect) {
+  async generatePersonalizedEmail(prospect, options = {}) {
     try {
       const { name, title, company, location, linkedinUrl, tags } = prospect;
       
@@ -126,8 +178,11 @@ class AutomationService {
       let profileData = null;
       let insights = null;
       
-      // Extraire le profil LinkedIn détaillé si URL disponible
-      if (linkedinUrl && linkedinUrl.includes('linkedin.com')) {
+      // Skip profile extraction for bulk workflows to avoid timeouts
+      const shouldExtractProfile = options.extractProfile !== false && options.bulkMode !== true;
+      
+      // Extraire le profil LinkedIn détaillé si URL disponible et non en mode bulk
+      if (shouldExtractProfile && linkedinUrl && linkedinUrl.includes('linkedin.com')) {
         console.log(`🔍 Extraction du profil LinkedIn: ${linkedinUrl}`);
         
         try {
@@ -143,6 +198,8 @@ class AutomationService {
         } catch (extractionError) {
           console.error(`❌ Erreur extraction profil:`, extractionError.message);
         }
+      } else if (options.bulkMode) {
+        console.log(`⚡ Mode bulk activé - génération email rapide sans extraction profil`);
       }
       
       // Générer l'email avec toutes les données disponibles
@@ -154,6 +211,7 @@ class AutomationService {
         prospect: name,
         profileAnalyzed: !!profileData,
         insights: insights,
+        bulkMode: options.bulkMode || false,
         generatedAt: new Date().toISOString()
       };
       
@@ -507,7 +565,52 @@ P.S. I would be happy to share a case study of how we helped a similar ${title} 
       this.browser = null;
       this.page = null;
     }
+    
+    // Close profile finder service
+    await profileFinderService.close();
+    
+    // Close LinkedIn automation
+    await linkedinAutomation.close();
+    
     this.isInitialized = false;
+  }
+
+  /**
+   * Find LinkedIn profile using Google search or Apollo
+   */
+  async findLinkedInProfile(name, company, title) {
+    try {
+      // Try Apollo first if API key is available
+      if (process.env.APOLLO_API_KEY) {
+        try {
+          const apolloResult = await profileFinderService.findProfileViaApollo(name, company, title);
+          if (apolloResult.success) {
+            return apolloResult;
+          }
+        } catch (apolloError) {
+          console.log(`⚠️ Apollo search failed: ${apolloError.message}`);
+        }
+      }
+      
+      // Fallback to Google search
+      const googleResult = await profileFinderService.findLinkedInProfile(name, company, title);
+      return googleResult;
+      
+    } catch (error) {
+      console.error(`❌ Profile search failed for ${name}:`, error.message);
+      return {
+        success: false,
+        profile: null,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Batch find LinkedIn profiles for multiple prospects
+   */
+  async findLinkedInProfilesBatch(prospects) {
+    return await profileFinderService.findProfilesBatch(prospects);
   }
 
   async healthCheck() {
@@ -515,10 +618,12 @@ P.S. I would be happy to share a case study of how we helped a similar ${title} 
       status: this.isInitialized ? 'active' : 'inactive',
       emailConfigured: !!this.emailTransporter,
       followUpsScheduled: this.followUps.length,
+      profileFinderActive: profileFinderService.initialized,
       features: [
-        'LinkedIn connections',
-        'LinkedIn messaging', 
-        'AI email generation',
+        'LinkedIn profile finding (Google/Apollo)',
+        'Real LinkedIn connections',
+        'Real LinkedIn messaging', 
+        'AI email generation with verification',
         'Email sending',
         'Follow-up scheduling'
       ]

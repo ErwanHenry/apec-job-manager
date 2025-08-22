@@ -7,6 +7,7 @@ const linkedinRoutes = require('./routes/linkedin');
 const googleSheets = require('./services/googleSheets');
 const automationService = require('./services/automationService');
 const emailNotificationService = require('./services/emailNotificationService');
+const emailFinderService = require('./services/emailFinderService');
 const { logEnvironmentStatus, getSystemInfo } = require('./utils/validation');
 const logger = require('./utils/logger');
 
@@ -53,6 +54,25 @@ app.post('/api/automation/linkedin-message', async (req, res) => {
 app.post('/api/automation/generate-email', async (req, res) => {
   try {
     const result = await automationService.generatePersonalizedEmail(req.body.prospect);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// Find Email Address
+app.post('/api/automation/find-email', async (req, res) => {
+  try {
+    const { prospect } = req.body;
+    
+    if (!prospect || !prospect.name) {
+      return res.status(400).json({ error: 'Prospect data with name is required' });
+    }
+    
+    const result = await emailFinderService.findEmail(prospect);
     res.json(result);
   } catch (error) {
     res.status(500).json({ 
@@ -552,6 +572,12 @@ app.post('/api/workflow/run-full-sequence', async (req, res) => {
     workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 🚀 Workflow démarré avec ${prospects.length} prospects`);
     workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ⚙️ Configuration: emails=${config?.actions?.generateEmails}, linkedin=${config?.actions?.sendLinkedInConnections}, followups=${config?.actions?.scheduleFollowups}`);
     
+    // Determine if this is a bulk workflow (>10 prospects = bulk mode for performance)
+    const isBulkWorkflow = prospects.length > 10;
+    if (isBulkWorkflow) {
+      workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ⚡ Mode BULK activé (${prospects.length} prospects) - génération rapide sans extraction profils LinkedIn`);
+    }
+
     // Send workflow start notification
     await emailNotificationService.sendWorkflowStartNotification({
       prospects,
@@ -567,6 +593,7 @@ app.post('/api/workflow/run-full-sequence', async (req, res) => {
       followupsScheduled: 0,
       errors: [],
       warnings: [],
+      bulkMode: isBulkWorkflow,
       logs: workflowLogs.join('\n')
     };
     
@@ -576,13 +603,36 @@ app.post('/api/workflow/run-full-sequence', async (req, res) => {
       workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 👤 Traitement de ${prospect.name} (${i + 1}/${prospects.length})`);
       
       try {
+        // Find email address if not available
+        if (!prospect.email || prospect.email.includes('not_unlocked') || prospect.email.includes('email_not_found')) {
+          try {
+            workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 🔍 Recherche email pour ${prospect.name}...`);
+            const emailResult = await emailFinderService.findEmail(prospect);
+            if (emailResult.success && emailResult.email) {
+              prospect.email = emailResult.email;
+              prospect.emailSource = emailResult.source;
+              prospect.emailVerified = emailResult.verified;
+              workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ✅ Email trouvé: ${emailResult.email} (${emailResult.source})`);
+            } else {
+              workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ⚠️ Aucun email trouvé pour ${prospect.name}`);
+            }
+          } catch (error) {
+            workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ❌ Erreur recherche email pour ${prospect.name}: ${error.message}`);
+          }
+        }
+        
         // Generate email if requested
         if (config?.actions?.generateEmails) {
           try {
-            const emailResult = await automationService.generatePersonalizedEmail(prospect);
+            const emailOptions = {
+              bulkMode: isBulkWorkflow,
+              extractProfile: !isBulkWorkflow // Only extract profiles for small workflows
+            };
+            const emailResult = await automationService.generatePersonalizedEmail(prospect, emailOptions);
             if (emailResult.success) {
               results.emailsGenerated++;
-              workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ✅ Email généré pour ${prospect.name}`);
+              const modeInfo = emailResult.bulkMode ? ' (mode rapide)' : '';
+              workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ✅ Email généré pour ${prospect.name}${modeInfo}`);
             } else {
               results.warnings.push(`Failed to generate email for ${prospect.name}`);
               workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ⚠️ Échec génération email pour ${prospect.name}`);
@@ -638,9 +688,10 @@ app.post('/api/workflow/run-full-sequence', async (req, res) => {
         
         results.prospectsProcessed++;
         
-        // Add small delay between prospects to avoid rate limiting
+        // Add delay between prospects to avoid rate limiting (shorter for bulk mode)
         if (i < prospects.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          const delay = isBulkWorkflow ? 500 : 2000; // 0.5s for bulk, 2s for regular
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
       } catch (error) {
         results.errors.push(`Error processing ${prospect.name}: ${error.message}`);
@@ -651,6 +702,41 @@ app.post('/api/workflow/run-full-sequence', async (req, res) => {
     const endTime = Date.now();
     results.duration = endTime - startTime;
     results.logs = workflowLogs.join('\n');
+    
+    // Save updated prospects (with found emails) to CRM if requested
+    if (config?.actions?.saveToCRM !== false) {
+      try {
+        workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 💾 Sauvegarde des prospects enrichis au CRM...`);
+        
+        const initialized = await googleSheets.initialize();
+        if (initialized) {
+          // Filter prospects that have been enriched with emails
+          const enrichedProspects = prospects.filter(p => 
+            p.email && !p.email.includes('not_unlocked') && !p.email.includes('email_not_found')
+          );
+          
+          if (enrichedProspects.length > 0) {
+            const prospectsToSave = enrichedProspects.map(prospect => ({
+              id: prospect.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
+              name: prospect.name,
+              company: prospect.company,
+              title: prospect.title,
+              linkedinUrl: prospect.linkedinUrl,
+              location: prospect.location,
+              email: prospect.email,
+              score: prospect.score || 0,
+              tags: `${prospect.tags || ''} ${prospect.emailSource ? `email:${prospect.emailSource}` : ''} ${prospect.emailVerified ? 'verified' : ''}`.trim()
+            }));
+            
+            await googleSheets.addProspectsToSheet(prospectsToSave);
+            workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ✅ ${enrichedProspects.length} prospects enrichis sauvegardés au CRM`);
+          }
+        }
+      } catch (error) {
+        workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] ❌ Erreur sauvegarde CRM: ${error.message}`);
+        results.warnings.push(`CRM save error: ${error.message}`);
+      }
+    }
     
     workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 🎯 Workflow terminé - ${results.prospectsProcessed} prospects traités`);
     workflowLogs.push(`[${new Date().toLocaleString('fr-FR')}] 📊 Résultats: ${results.emailsGenerated} emails, ${results.linkedinConnections} connexions, ${results.followupsScheduled} relances`);
@@ -728,6 +814,14 @@ async function initialize() {
       console.log('✅ Automation service ready');
     } else {
       console.log('⚠️ Automation service has limited functionality');
+    }
+    
+    // Initialize Email Finder Service
+    const emailFinderReady = await emailFinderService.initialize();
+    if (emailFinderReady) {
+      console.log('✅ Email finder service ready');
+    } else {
+      console.log('⚠️ Email finder service has limited functionality');
     }
   } catch (error) {
     console.error('❌ Error initializing Google Sheets:', error.message);

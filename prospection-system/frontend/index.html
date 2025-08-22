@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LinkedIn to CRM - Prospection System</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="update-all-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -39,7 +40,96 @@
                     <button id="authenticateGoogle" class="btn-primary">🔑 Authenticate Google</button>
                     <button id="clearCRM" class="btn-danger">🗑️ Clear CRM Data</button>
                     <button id="removeDuplicates" class="btn-warning">🔄 Remove Duplicates</button>
+                    <button id="updateAllProspects" class="btn-info">🚀 Update All Prospects</button>
                     <button id="exportData" class="btn-secondary">📥 Export CSV</button>
+                </div>
+                
+                <!-- Update All Prospects Modal -->
+                <div id="updateAllModal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>🚀 Update All Prospects</h3>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Cette opération va mettre à jour tous vos prospects existants avec les dernières données disponibles.</p>
+                            
+                            <div class="update-options">
+                                <h4>Options de mise à jour :</h4>
+                                <label class="option">
+                                    <input type="checkbox" id="findMissingEmails" checked>
+                                    <span class="checkmark"></span>
+                                    🔍 Rechercher les emails manquants
+                                    <small>Utilise Apollo.io, Hunter.io et patterns pour trouver les emails</small>
+                                </label>
+                                
+                                <label class="option">
+                                    <input type="checkbox" id="updateScores" checked>
+                                    <span class="checkmark"></span>
+                                    📊 Recalculer les scores
+                                    <small>Actualise les scores basés sur les nouvelles données</small>
+                                </label>
+                                
+                                <label class="option">
+                                    <input type="checkbox" id="cleanDuplicates" checked>
+                                    <span class="checkmark"></span>
+                                    🗑️ Supprimer les doublons
+                                    <small>Identifie et supprime les prospects en double</small>
+                                </label>
+                                
+                                <label class="option">
+                                    <input type="checkbox" id="refreshLinkedInData">
+                                    <span class="checkmark"></span>
+                                    🔄 Actualiser données LinkedIn
+                                    <small>⚠️ Plus lent - Extraction des profils complets</small>
+                                </label>
+                            </div>
+                            
+                            <div class="performance-settings">
+                                <h4>Paramètres de performance :</h4>
+                                <div class="setting-row">
+                                    <label>Taille des lots :</label>
+                                    <select id="batchSize">
+                                        <option value="5">5 (plus lent, plus sûr)</option>
+                                        <option value="10" selected>10 (recommandé)</option>
+                                        <option value="20">20 (plus rapide)</option>
+                                    </select>
+                                </div>
+                                <div class="setting-row">
+                                    <label>Traitement concurrent :</label>
+                                    <select id="maxConcurrent">
+                                        <option value="1">1 (séquentiel)</option>
+                                        <option value="3" selected>3 (recommandé)</option>
+                                        <option value="5">5 (plus rapide)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="estimated-time">
+                                <p><strong>Temps estimé :</strong> <span id="estimatedTime">5-15 minutes</span></p>
+                                <p><small>Vous recevrez un email de notification une fois terminé</small></p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="cancelUpdate" class="btn-secondary">Annuler</button>
+                            <button id="startUpdate" class="btn-primary">🚀 Démarrer la mise à jour</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Update Progress -->
+                <div id="updateProgress" class="progress-section" style="display: none;">
+                    <h4>🔄 Mise à jour en cours...</h4>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div id="progressText" class="progress-text">Initialisation...</div>
+                    <div id="progressStats" class="progress-stats">
+                        <span>Traités: <strong id="processedCount">0</strong></span>
+                        <span>Emails trouvés: <strong id="emailsFoundCount">0</strong></span>
+                        <span>Erreurs: <strong id="errorsCount">0</strong></span>
+                    </div>
+                    <button id="cancelUpdateProgress" class="btn-danger">❌ Annuler</button>
                 </div>
             </section>
 
@@ -209,6 +299,7 @@
                         <button id="refreshProspects" class="btn-refresh">🔄 Refresh</button>
                         <button id="selectAllProspects" class="btn-secondary">✅ Select All</button>
                         <button id="deselectAllProspects" class="btn-secondary">❌ Deselect All</button>
+                        <button id="findEmailsBtn" class="btn-primary">📧 Find Emails</button>
                     </div>
                 </div>
                 
@@ -272,14 +363,17 @@
                 </div>
             </section>
 
-            <!-- Automation Workflows Section -->
+            <!-- Quick Actions & Settings -->
             <section class="card">
-                <h2>🤖 Automation Workflows</h2>
-                <div class="automation-config">
+                <h2>⚡ Quick Actions & Settings</h2>
+                <div class="quick-actions">
                     
                     <!-- Email Configuration -->
                     <div class="config-section">
-                        <h3>📧 Email Configuration</h3>
+                        <h3>📧 Email Setup</h3>
+                        <div class="config-explanation">
+                            <p>Configure your Gmail account to enable automated email sending. Your credentials are stored securely and only used for sending emails.</p>
+                        </div>
                         <div class="config-grid">
                             <div class="config-item">
                                 <label>Gmail Account:</label>
@@ -288,123 +382,77 @@
                             <div class="config-item">
                                 <label>App Password:</label>
                                 <input type="password" id="gmailPassword" placeholder="App-specific password">
-                                <small>Generate at: Google Account → Security → App passwords</small>
+                                <small><a href="https://support.google.com/accounts/answer/185833" target="_blank">🔗 How to generate an App Password</a></small>
                             </div>
                         </div>
                         <button id="testEmail" class="btn-secondary">🧪 Test Email Configuration</button>
                     </div>
 
-                    <!-- Workflow Templates -->
+                    <!-- Workflow Quick Settings -->
                     <div class="config-section">
-                        <h3>🎯 Workflow Templates</h3>
-                        <div class="workflow-templates">
-                            
-                            <div class="workflow-card">
-                                <h4>🔗 LinkedIn Connection Sequence</h4>
-                                <div class="workflow-steps">
-                                    <div class="step">1. Send connection request</div>
-                                    <div class="step">2. Wait 3 days if accepted</div>
-                                    <div class="step">3. Send follow-up message</div>
-                                    <div class="step">4. Schedule email if no response</div>
-                                </div>
-                                <div class="workflow-config">
-                                    <label>Connection message template:</label>
-                                    <textarea id="connectionTemplate" rows="3" placeholder="Hi {name}, I'd love to connect with you given your role as {title} at {company}.">Hi {name}, I'd love to connect with you given your role as {title} at {company}.</textarea>
-                                </div>
-                                <button class="btn-primary">💾 Save Template</button>
-                            </div>
-
-                            <div class="workflow-card">
-                                <h4>📧 Email Outreach Sequence</h4>
-                                <div class="workflow-steps">
-                                    <div class="step">1. Generate personalized email</div>
-                                    <div class="step">2. Send initial outreach</div>
-                                    <div class="step">3. Follow-up after 5 days</div>
-                                    <div class="step">4. Final follow-up after 10 days</div>
-                                </div>
-                                <div class="workflow-config">
-                                    <label>Email personalization context:</label>
-                                    <textarea id="emailContext" rows="3" placeholder="We help HR professionals streamline recruitment processes...">We help HR professionals streamline recruitment processes with AI-powered tools that reduce time-to-hire by 40%.</textarea>
-                                </div>
-                                <button class="btn-primary">💾 Save Template</button>
-                            </div>
-
-                            <div class="workflow-card">
-                                <h4>⚡ Hybrid Approach</h4>
-                                <div class="workflow-steps">
-                                    <div class="step">1. LinkedIn connection first</div>
-                                    <div class="step">2. If no response, try email</div>
-                                    <div class="step">3. Follow-up sequences on both channels</div>
-                                    <div class="step">4. Mark as qualified when they respond</div>
-                                </div>
-                                <div class="workflow-config">
-                                    <label>Wait time between attempts (days):</label>
-                                    <input type="number" id="waitTime" value="3" min="1" max="30">
-                                </div>
-                                <button class="btn-primary">💾 Save Template</button>
-                            </div>
-
+                        <h3>🎯 Workflow Quick Settings</h3>
+                        <div class="config-explanation">
+                            <p>These settings apply to the <strong>automation sequence above</strong> when you click "Run Full Sequence". Customize templates and preferences here.</p>
                         </div>
-                    </div>
-
-                    <!-- Automation Rules -->
-                    <div class="config-section">
-                        <h3>⚙️ Automation Rules</h3>
-                        <div class="rules-grid">
-                            <div class="rule-item">
-                                <label>
-                                    <input type="checkbox" id="autoConnection" checked>
-                                    Auto-send LinkedIn connections
-                                </label>
-                                <small>Automatically send connection requests to new prospects</small>
+                        
+                        <div class="workflow-settings">
+                            <div class="setting-group">
+                                <h4>📧 Email Template Settings</h4>
+                                <label>Company/Service Description:</label>
+                                <textarea id="companyDescription" rows="2" placeholder="Describe what your company does for AI email personalization...">We help HR professionals streamline recruitment processes with AI-powered tools that reduce time-to-hire by 40% and improve candidate quality.</textarea>
+                                
+                                <label>Email Tone:</label>
+                                <select id="emailTone">
+                                    <option value="professional">Professional</option>
+                                    <option value="friendly">Friendly</option>
+                                    <option value="concise">Concise/Executive</option>
+                                </select>
                             </div>
-                            <div class="rule-item">
-                                <label>
-                                    <input type="checkbox" id="autoEmail" checked>
-                                    Auto-generate personalized emails
-                                </label>
-                                <small>Use AI to create personalized email content</small>
+                            
+                            <div class="setting-group">
+                                <h4>🔗 LinkedIn Settings</h4>
+                                <label>Default Connection Message:</label>
+                                <textarea id="defaultLinkedInMessage" rows="2" placeholder="Hi {name}, I'd love to connect with you given your role as {title} at {company}.">Hi {name}, I'd love to connect with you given your role as {title} at {company}. I believe we could have valuable discussions about industry trends.</textarea>
+                                
+                                <label>Wait time between actions:</label>
+                                <select id="actionDelay">
+                                    <option value="1">1 second (testing)</option>
+                                    <option value="3" selected>3 seconds (normal)</option>
+                                    <option value="5">5 seconds (safe)</option>
+                                    <option value="10">10 seconds (very safe)</option>
+                                </select>
                             </div>
-                            <div class="rule-item">
-                                <label>
-                                    <input type="checkbox" id="autoFollowup">
-                                    Auto-schedule follow-ups
-                                </label>
-                                <small>Automatically schedule follow-ups based on templates</small>
-                            </div>
-                            <div class="rule-item">
-                                <label>
-                                    <input type="checkbox" id="smartTiming" checked>
-                                    Smart timing optimization
-                                </label>
-                                <small>Send messages at optimal times (9-11 AM, 2-4 PM)</small>
-                            </div>
+                        </div>
+                        
+                        <div class="settings-actions">
+                            <button id="saveWorkflowSettings" class="btn-primary">💾 Save Settings</button>
+                            <button id="resetToDefaults" class="btn-secondary">🔄 Reset to Defaults</button>
                         </div>
                     </div>
 
                     <!-- Analytics & Monitoring -->
                     <div class="config-section">
-                        <h3>📊 Automation Analytics</h3>
+                        <h3>📊 Today's Activity</h3>
                         <div class="analytics-grid">
                             <div class="metric-card">
-                                <h4>🔗 LinkedIn Activity</h4>
+                                <h4>🔗 LinkedIn</h4>
                                 <div class="metric-value" id="linkedinConnections">0</div>
-                                <div class="metric-label">Connections Sent Today</div>
+                                <div class="metric-label">Connections Sent</div>
                             </div>
                             <div class="metric-card">
-                                <h4>📧 Email Activity</h4>
+                                <h4>📧 Emails</h4>
                                 <div class="metric-value" id="emailsSent">0</div>
-                                <div class="metric-label">Emails Sent Today</div>
+                                <div class="metric-label">Emails Generated</div>
                             </div>
                             <div class="metric-card">
-                                <h4>⏰ Scheduled</h4>
+                                <h4>⏰ Follow-ups</h4>
                                 <div class="metric-value" id="followupsScheduled">0</div>
-                                <div class="metric-label">Follow-ups Pending</div>
+                                <div class="metric-label">Scheduled</div>
                             </div>
                             <div class="metric-card">
-                                <h4>📈 Response Rate</h4>
-                                <div class="metric-value" id="responseRate">0%</div>
-                                <div class="metric-label">This Week</div>
+                                <h4>👥 Prospects</h4>
+                                <div class="metric-value" id="prospectsProcessed">0</div>
+                                <div class="metric-label">Processed</div>
                             </div>
                         </div>
                     </div>
@@ -421,5 +469,6 @@
     </div>
 
     <script src="app.js"></script>
+    <script src="update-all-prospects.js"></script>
 </body>
 </html>

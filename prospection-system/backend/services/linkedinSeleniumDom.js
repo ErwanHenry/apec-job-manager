@@ -18,19 +18,75 @@ class LinkedInSeleniumDom {
     try {
       console.log('🤖 Initialisation Selenium avec vraies interactions DOM...');
       
-      // Configuration Chrome avec profil utilisateur réel
+      // Vérifier si Chrome/Brave est installé
+      const { execSync } = require('child_process');
+      let browserPath = null;
+      
+      try {
+        // Try to find Chrome first
+        try {
+          execSync('which google-chrome || which chrome || which chromium', { stdio: 'ignore' });
+          browserPath = 'chrome';
+        } catch (chromeError) {
+          // Try Brave Browser as fallback
+          try {
+            const bravePath = '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser';
+            const fs = require('fs');
+            if (fs.existsSync(bravePath)) {
+              browserPath = bravePath;
+              console.log('✅ Using Brave Browser as Chrome alternative');
+            } else {
+              throw new Error('No browser found');
+            }
+          } catch (braveError) {
+            throw new Error('No browser found');
+          }
+        }
+      } catch (error) {
+        throw new Error(`Chrome/Brave not found. Please install a Chromium-based browser:
+📍 macOS: brew install --cask google-chrome
+📍 macOS (alternative): brew install --cask brave-browser
+📍 Linux: sudo apt-get install google-chrome-stable
+📍 Or select a different scraping method like Apollo.io API`);
+      }
+      
+      // Configuration Chrome/Brave avec profil utilisateur réel
       const options = new chrome.Options();
       
-      // Utiliser un profil Chrome existant pour éviter la détection
-      const userDataDir = '/Users/erwanhenry/Library/Application Support/Google/Chrome/Default';
-      options.addArguments(`--user-data-dir=${userDataDir}`);
+      // Si on utilise Brave, définir le chemin de l'exécutable
+      if (browserPath !== 'chrome') {
+        options.setChromeBinaryPath(browserPath);
+      }
       
-      // Paramètres anti-détection
+      // Utiliser un profil utilisateur approprié
+      let userDataDir;
+      if (browserPath !== 'chrome') {
+        // Profil Brave
+        userDataDir = '/Users/erwanhenry/Library/Application Support/BraveSoftware/Brave-Browser/Default';
+      } else {
+        // Profil Chrome
+        userDataDir = '/Users/erwanhenry/Library/Application Support/Google/Chrome/Default';
+      }
+      
+      // Ne pas utiliser un profil existant pour éviter les conflits
+      // options.addArguments(`--user-data-dir=${userDataDir}`);
+      
+      // Paramètres anti-détection améliorés
       options.addArguments('--disable-blink-features=AutomationControlled');
       options.addArguments('--disable-extensions');
       options.addArguments('--no-sandbox');
+      options.addArguments('--disable-setuid-sandbox');
       options.addArguments('--disable-dev-shm-usage');
       options.addArguments('--disable-gpu');
+      options.addArguments('--no-first-run');
+      options.addArguments('--no-default-browser-check');
+      options.addArguments('--disable-default-apps');
+      options.addArguments('--disable-popup-blocking');
+      options.addArguments('--disable-translate');
+      options.addArguments('--disable-background-timer-throttling');
+      options.addArguments('--disable-renderer-backgrounding');
+      options.addArguments('--disable-backgrounding-occluded-windows');
+      options.addArguments('--disable-ipc-flooding-protection');
       options.addArguments('--window-size=1920,1080');
       options.addArguments('--start-maximized');
       
@@ -38,8 +94,22 @@ class LinkedInSeleniumDom {
       options.addArguments('--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
       
       // Désactiver l'automation
-      options.excludeSwitches(['enable-automation']);
+      options.excludeSwitches(['enable-automation', 'enable-logging']);
       options.addArguments('--disable-blink-features=AutomationControlled');
+      
+      // Améliorer la stabilité
+      options.addArguments('--disable-background-mode');
+      options.addArguments('--disable-client-side-phishing-detection');
+      options.addArguments('--disable-hang-monitor');
+      options.addArguments('--disable-prompt-on-repost');
+      options.addArguments('--disable-sync');
+      options.addArguments('--disable-web-security');
+      options.addArguments('--ignore-certificate-errors');
+      options.addArguments('--ignore-ssl-errors');
+      options.addArguments('--ignore-certificate-errors-spki-list');
+      options.addArguments('--ignore-certificate-errors-skip-list');
+      
+      console.log(`🚀 Launching browser: ${browserPath !== 'chrome' ? 'Brave Browser' : 'Chrome'}`);
       
       this.driver = await new Builder()
         .forBrowser('chrome')
