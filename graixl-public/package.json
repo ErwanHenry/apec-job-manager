@@ -1,0 +1,22 @@
+{
+  "name": "graixl-public",
+  "version": "1.0.0",
+  "description": "Graixl - Prospection Intelligente avec Claude Code (Version Publique)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "keywords": [
+    "prospection",
+    "ai",
+    "claude-code",
+    "linkedin",
+    "apollo",
+    "multi-agents",
+    "b2b",
+    "sales-automation"
+  ],
+  "author": "Graixl Team",
+  "license": "MIT"
+}
