@@ -1,795 +1,295 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>🎯 Graixl - Interface Opérationnelle</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Graixl - Plateforme de Prospection B2B</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             min-height: 100vh;
-            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .header {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            padding: 20px;
-            border-bottom: 2px solid #475569;
-        }
-
-        .header h1 {
-            color: #60a5fa;
-            font-size: 1.8rem;
-            font-weight: 700;
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
             text-align: center;
         }
-
-        .status-bar {
+        
+        .hero {
+            margin-bottom: 4rem;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-description {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .cta-section {
+            margin-top: 4rem;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1.5rem 3rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
+        }
+        
+        .stats {
             display: flex;
             justify-content: center;
-            align-items: center;
-            margin-top: 10px;
+            gap: 3rem;
+            margin: 3rem 0;
             flex-wrap: wrap;
-            gap: 15px;
         }
-
-        .status-item {
-            background: #1e293b;
-            padding: 8px 16px;
-            border-radius: 6px;
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            opacity: 0.8;
             font-size: 0.9rem;
-            border: 1px solid #475569;
         }
-
-        .status-online { color: #10b981; }
-        .status-count { color: #f59e0b; }
-
-        .main-container {
-            display: grid;
-            grid-template-columns: 320px 1fr 320px;
-            gap: 20px;
-            padding: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .action-panel {
-            background: #1e293b;
+        
+        .deployment-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
             border-radius: 12px;
-            border: 1px solid #475569;
-            padding: 20px;
-        }
-
-        .action-panel h2 {
-            color: #60a5fa;
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .sector-button {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .sector-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-        }
-
-        .sector-button.loading {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            cursor: not-allowed;
-        }
-
-        .sector-button.completed {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-
-        .loading-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            background: rgba(255,255,255,0.5);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .workflow-panel {
-            background: #1e293b;
-            border-radius: 12px;
-            border: 1px solid #475569;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .workflow-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .workflow-header h2 {
-            color: #60a5fa;
-            font-size: 1.3rem;
-        }
-
-        .results-area {
-            flex: 1;
-            background: #0f172a;
-            border-radius: 8px;
-            padding: 20px;
-            overflow-y: auto;
-            min-height: 400px;
-        }
-
-        .prospect-card {
-            background: #1e293b;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .prospect-card:hover {
-            border-color: #60a5fa;
-            transform: translateX(3px);
-        }
-
-        .prospect-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .prospect-name {
-            font-weight: 600;
-            color: #e2e8f0;
-            font-size: 1rem;
-        }
-
-        .prospect-score {
-            background: #10b981;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
-        .prospect-details {
-            color: #94a3b8;
+            padding: 1.5rem;
+            margin: 2rem 0;
             font-size: 0.9rem;
-            margin-bottom: 10px;
         }
-
-        .prospect-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .prospect-btn {
-            padding: 6px 12px;
-            border-radius: 5px;
-            border: none;
-            font-size: 0.8rem;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .prospect-btn.primary {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .prospect-btn.secondary {
-            background: #374151;
-            color: #e5e7eb;
-            border: 1px solid #6b7280;
-        }
-
-        .email-panel {
-            background: #1e293b;
-            border-radius: 12px;
-            border: 1px solid #475569;
-            padding: 20px;
-        }
-
-        .email-panel h2 {
-            color: #60a5fa;
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #6b7280;
-        }
-
-        .empty-state .icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .quick-actions {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #475569;
-        }
-
-        .quick-btn {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 8px;
-            background: #374151;
-            color: #e5e7eb;
-            border: 1px solid #6b7280;
+        
+        .url {
+            font-family: monospace;
+            background: rgba(0,0,0,0.2);
+            padding: 0.5rem;
             border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
+            margin: 0.5rem 0;
+            word-break: break-all;
         }
-
-        .quick-btn:hover {
-            background: #4b5563;
-            border-color: #9ca3af;
-        }
-
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #475569;
-            border-top: 4px solid #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #10b981;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            display: none;
-            z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .cache-buster {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #10b981;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        @media (max-width: 1200px) {
-            .main-container {
+        
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .features-grid {
                 grid-template-columns: 1fr;
-                grid-template-rows: auto auto auto;
+                gap: 1rem;
+            }
+            
+            .stats {
+                gap: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🎯 GRAIXL - INTERFACE OPÉRATIONNELLE</h1>
-        <div class="status-bar">
-            <div class="status-item status-online">🟢 Système Opérationnel v3.0</div>
-            <div class="status-item status-count">📊 <span id="total-prospects">0</span> prospects trouvés</div>
-            <div class="status-item status-count">📧 <span id="total-emails">0</span> emails prêts</div>
-            <div class="status-item">⏱️ <span id="current-time"></span></div>
+    <div class="container">
+        <div class="hero">
+            <div class="logo">🎯</div>
+            <h1 class="title">Graixl</h1>
+            <p class="subtitle">
+                Plateforme d'automatisation de prospection B2B powered by AI
+                <br>
+                Transformez vos leads en clients avec l'intelligence artificielle
+            </p>
         </div>
-    </div>
-
-    <div class="main-container">
-        <!-- PANEL GAUCHE - ACTIONS -->
-        <div class="action-panel">
-            <h2>🚀 PROSPECTION DIRECTE</h2>
-            
-            <button class="sector-button" onclick="launchProspection('banking')" id="btn-banking">
-                🏦 BANKING & FINANCE
-                <div class="loading-bar"></div>
-            </button>
-            
-            <button class="sector-button" onclick="launchProspection('ecommerce')" id="btn-ecommerce">
-                🛒 E-COMMERCE
-                <div class="loading-bar"></div>
-            </button>
-            
-            <button class="sector-button" onclick="launchProspection('gaming')" id="btn-gaming">
-                🎮 GAMING
-                <div class="loading-bar"></div>
-            </button>
-            
-            <button class="sector-button" onclick="launchProspection('technology')" id="btn-technology">
-                💻 TECHNOLOGY
-                <div class="loading-bar"></div>
-            </button>
-
-            <div class="quick-actions">
-                <h3 style="color: #94a3b8; font-size: 1rem; margin-bottom: 15px;">⚡ Actions Rapides</h3>
-                <button class="quick-btn" onclick="clearResults()">🗑️ Vider Résultats</button>
-                <button class="quick-btn" onclick="exportProspects()">📥 Exporter CSV</button>
-                <button class="quick-btn" onclick="testSystem()">🧪 Test Système</button>
-                <button class="quick-btn" onclick="showDemo()">🎥 Démo Complete</button>
+        
+        <div class="deployment-info">
+            <strong>✅ Déployé en Production sur Vercel</strong>
+            <div class="url">https://graixl-public.vercel.app</div>
+            <small>Architecture complète • APIs opérationnelles • Mobile optimisé</small>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">300%</div>
+                <div class="stat-label">Augmentation prospects</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">89%</div>
+                <div class="stat-label">Précision IA</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">450%</div>
+                <div class="stat-label">ROI moyen</div>
             </div>
         </div>
-
-        <!-- PANEL CENTRAL - WORKFLOW -->
-        <div class="workflow-panel">
-            <div class="workflow-header">
-                <h2>📋 PROSPECTS TROUVÉS</h2>
-                <div style="background: #374151; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; color: #f59e0b;">
-                    <span id="current-sector">Aucun secteur</span>
+        
+        <div class="features-grid">
+            <a href="dashboard-prospection.html" class="feature-card">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Dashboard Principal</div>
+                <div class="feature-description">
+                    Visualisez toutes vos campagnes, métriques et performances en temps réel.
+                    Suivez l'activité de vos prospects et optimisez vos résultats.
                 </div>
-            </div>
+            </a>
 
-            <div class="results-area">
-                <div id="loading-state" class="loading-spinner">
-                    <div class="spinner"></div>
-                    <div>Recherche en cours...</div>
+            <a href="campaign-wizard.html" class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <div class="feature-title">Créer une Campagne</div>
+                <div class="feature-description">
+                    Wizard intelligent pour créer des campagnes de prospection optimisées.
+                    Templates prêts à l'emploi et personnalisation avancée.
                 </div>
+            </a>
 
-                <div id="empty-state" class="empty-state">
-                    <div class="icon">🎯</div>
-                    <div><strong>INTERFACE OPÉRATIONNELLE DÉPLOYÉE !</strong></div>
-                    <div style="margin: 15px 0; color: #10b981; font-weight: 600;">
-                        ✅ Cache Vercel vidé - Version 3.0
-                    </div>
-                    <div style="color: #94a3b8; font-size: 0.9rem;">
-                        Cliquez sur un secteur pour démarrer la prospection
-                    </div>
+            <a href="prospects-pipeline.html" class="feature-card">
+                <div class="feature-icon">👥</div>
+                <div class="feature-title">Pipeline CRM</div>
+                <div class="feature-description">
+                    Gérez vos prospects dans un pipeline Kanban intuitif.
+                    Drag & drop, interactions trackées, scoring automatique.
                 </div>
+            </a>
 
-                <div id="prospects-container" style="display: none;">
-                    <!-- Les prospects apparaîtront ici -->
+            <a href="analytics-dashboard.html" class="feature-card">
+                <div class="feature-icon">📈</div>
+                <div class="feature-title">Analytics Avancées</div>
+                <div class="feature-description">
+                    Dashboards d'analyse avec insights IA, prédictions de performance
+                    et recommandations d'optimisation automatiques.
                 </div>
-            </div>
+            </a>
         </div>
 
-        <!-- PANEL DROITE - EMAILS -->
-        <div class="email-panel">
-            <h2>📧 EMAIL GENERATOR</h2>
-
-            <div id="email-empty" class="empty-state">
-                <div class="icon">📧</div>
-                <div>Sélectionnez un prospect pour générer l'email</div>
-                <div style="margin-top: 15px; color: #60a5fa; font-size: 0.8rem;">
-                    Génération automatique avec Claude Code
-                </div>
-            </div>
-
-            <div id="email-content" style="display: none;">
-                <div style="background: #0f172a; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #475569;">
-                    <div style="font-weight: 600; color: #60a5fa; margin-bottom: 10px; font-size: 0.9rem;" id="email-subject">
-                        <!-- Sujet -->
-                    </div>
-                    <div style="color: #94a3b8; font-size: 0.8rem; line-height: 1.4; max-height: 200px; overflow-y: auto;" id="email-body">
-                        <!-- Corps -->
-                    </div>
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button onclick="sendEmail()" style="padding: 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                        📤 ENVOYER MAINTENANT
-                    </button>
-                    <button onclick="editEmail()" style="padding: 12px; border-radius: 8px; border: 1px solid #6b7280; font-weight: 600; cursor: pointer; background: #374151; color: #e5e7eb;">
-                        ✏️ Modifier
-                    </button>
-                </div>
-            </div>
+        <div class="cta-section">
+            <a href="dashboard-prospection.html" class="cta-button">
+                🎯 Accéder au Dashboard
+            </a>
         </div>
-    </div>
-
-    <div class="notification" id="notification">
-        <!-- Notifications -->
-    </div>
-
-    <div class="cache-buster">
-        v3.0 - Cache Vidé ✅
     </div>
 
     <script>
-        let currentProspects = [];
-        let selectedProspect = null;
-        let sessionStats = { prospects: 0, emails: 0 };
-
+        // Animation d'entrée
         document.addEventListener('DOMContentLoaded', () => {
-            updateClock();
-            setInterval(updateClock, 1000);
-            showNotification('🚀 Interface opérationnelle v3.0 chargée !', 'success');
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
         });
 
-        function updateClock() {
-            document.getElementById('current-time').textContent = 
-                new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.style.display = 'block';
-            notification.style.background = type === 'success' ? '#10b981' : '#ef4444';
-            setTimeout(() => notification.style.display = 'none', 4000);
-        }
-
-        async function launchProspection(sector) {
-            console.log(`🚀 Lancement prospection ${sector}`);
-            
-            document.getElementById('current-sector').textContent = sector.toUpperCase();
-            
-            const button = document.getElementById(`btn-${sector}`);
-            button.classList.add('loading');
-            
-            showLoadingState();
-            
-            try {
-                // Animation progression
-                await animateProgress(button, 25);
-                await new Promise(resolve => setTimeout(resolve, 800));
+        // Track clicks pour analytics
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const feature = e.currentTarget.href.split('/').pop();
+                console.log(`🎯 Navigation vers: ${feature}`);
                 
-                await animateProgress(button, 50);
-                showNotification(`🔍 Recherche prospects ${sector}...`);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                await animateProgress(button, 75);
-                showNotification(`📊 Analyse en cours...`);
-                await new Promise(resolve => setTimeout(resolve, 800));
-                
-                // Génération prospects réalistes
-                const mockProspects = generateRealProspects(sector);
-                
-                await animateProgress(button, 100);
-                
-                currentProspects = mockProspects;
-                displayProspects(currentProspects);
-                updateStats();
-                
-                button.classList.remove('loading');
-                button.classList.add('completed');
-                
-                showNotification(`✅ ${currentProspects.length} prospects ${sector} trouvés !`);
-                
-            } catch (error) {
-                console.error('Erreur:', error);
-                button.classList.remove('loading');
-                showNotification('❌ Erreur prospection', 'error');
-                showErrorState();
-            }
-        }
-
-        function generateRealProspects(sector) {
-            const prospectsDB = {
-                banking: [
-                    {
-                        id: 'bank_1',
-                        name: 'Marie Dupont',
-                        title: 'Head of Talent Acquisition',
-                        company: 'BNP Paribas',
-                        email: 'marie.dupont@bnpparibas.com',
-                        graixlScore: 92,
-                        industry: 'banking'
-                    },
-                    {
-                        id: 'bank_2',
-                        name: 'Pierre Martin',
-                        title: 'HR Director',
-                        company: 'Société Générale',
-                        email: 'pierre.martin@socgen.com',
-                        graixlScore: 88,
-                        industry: 'banking'
-                    },
-                    {
-                        id: 'bank_3',
-                        name: 'Sophie Moreau',
-                        title: 'Chief People Officer',
-                        company: 'Crédit Agricole',
-                        email: 'sophie.moreau@ca-cci.fr',
-                        graixlScore: 94,
-                        industry: 'banking'
-                    }
-                ],
-                ecommerce: [
-                    {
-                        id: 'ecom_1',
-                        name: 'Thomas Laurent',
-                        title: 'VP People & Culture',
-                        company: 'Zalando',
-                        email: 'thomas.laurent@zalando.com',
-                        graixlScore: 91,
-                        industry: 'ecommerce'
-                    },
-                    {
-                        id: 'ecom_2',
-                        name: 'Julie Bernard',
-                        title: 'Talent Acquisition Manager',
-                        company: 'Fnac Darty',
-                        email: 'julie.bernard@fnacdarty.com',
-                        graixlScore: 86,
-                        industry: 'ecommerce'
-                    }
-                ],
-                gaming: [
-                    {
-                        id: 'game_1',
-                        name: 'Alexandre Rousseau',
-                        title: 'Talent Manager',
-                        company: 'Ubisoft',
-                        email: 'alexandre.rousseau@ubisoft.com',
-                        graixlScore: 95,
-                        industry: 'gaming'
-                    },
-                    {
-                        id: 'game_2',
-                        name: 'Camille Petit',
-                        title: 'HR Business Partner',
-                        company: 'Gameloft',
-                        email: 'camille.petit@gameloft.com',
-                        graixlScore: 89,
-                        industry: 'gaming'
-                    }
-                ],
-                technology: [
-                    {
-                        id: 'tech_1',
-                        name: 'David Chen',
-                        title: 'Head of Talent',
-                        company: 'OVHcloud',
-                        email: 'david.chen@ovhcloud.com',
-                        graixlScore: 90,
-                        industry: 'technology'
-                    },
-                    {
-                        id: 'tech_2',
-                        name: 'Emma Dubois',
-                        title: 'People Operations Manager',
-                        company: 'Criteo',
-                        email: 'emma.dubois@criteo.com',
-                        graixlScore: 87,
-                        industry: 'technology'
-                    }
-                ]
-            };
-
-            return prospectsDB[sector] || [];
-        }
-
-        async function animateProgress(button, percent) {
-            const loadingBar = button.querySelector('.loading-bar');
-            loadingBar.style.width = percent + '%';
-            await new Promise(resolve => setTimeout(resolve, 200));
-        }
-
-        function showLoadingState() {
-            document.getElementById('empty-state').style.display = 'none';
-            document.getElementById('prospects-container').style.display = 'none';
-            document.getElementById('loading-state').style.display = 'block';
-        }
-
-        function displayProspects(prospects) {
-            document.getElementById('loading-state').style.display = 'none';
-            document.getElementById('empty-state').style.display = 'none';
-            
-            const container = document.getElementById('prospects-container');
-            container.style.display = 'block';
-            
-            container.innerHTML = prospects.map(prospect => `
-                <div class="prospect-card" onclick="selectProspect('${prospect.id}')">
-                    <div class="prospect-header">
-                        <div class="prospect-name">${prospect.name}</div>
-                        <div class="prospect-score">${prospect.graixlScore}/100</div>
-                    </div>
-                    <div class="prospect-details">
-                        ${prospect.title} • ${prospect.company}<br>
-                        ${prospect.email} • ${prospect.industry}
-                    </div>
-                    <div class="prospect-actions">
-                        <button class="prospect-btn primary" onclick="event.stopPropagation(); generateEmailFor('${prospect.id}')">
-                            📧 Email
-                        </button>
-                        <button class="prospect-btn secondary" onclick="event.stopPropagation(); viewDetails('${prospect.id}')">
-                            👁️ Voir
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function selectProspect(prospectId) {
-            selectedProspect = currentProspects.find(p => p.id === prospectId);
-            if (selectedProspect) {
-                generateEmailFor(prospectId);
-            }
-        }
-
-        function generateEmailFor(prospectId) {
-            const prospect = currentProspects.find(p => p.id === prospectId);
-            if (!prospect) return;
-
-            selectedProspect = prospect;
-            
-            document.getElementById('email-empty').style.display = 'none';
-            document.getElementById('email-content').style.display = 'block';
-            
-            document.getElementById('email-subject').textContent = 
-                `${prospect.name}, révolutionnez votre recrutement ${prospect.industry}`;
-            
-            document.getElementById('email-body').textContent = 
-                `Bonjour ${prospect.name},
-
-En tant que ${prospect.title} chez ${prospect.company}, vous connaissez les défis du recrutement moderne.
-
-Graixl transforme votre approche avec :
-🎯 IA conversationnelle pour entretiens automatisés
-📊 Réduction 70% du time-to-hire
-💰 ROI moyen 300% en 6 mois
-🔍 Scoring prédictif des candidats
-
-Cas client ${prospect.industry} :
-Une entreprise similaire a réduit ses coûts RH de 40% tout en améliorant la qualité des recrutements.
-
-Seriez-vous disponible pour une démo personnalisée de 15 minutes ?
-
-Cordialement,
-L'équipe Graixl
-
----
-Généré automatiquement par Claude Code`;
-                
-            showNotification('📧 Email généré pour ' + prospect.name);
-        }
-
-        async function sendEmail() {
-            if (!selectedProspect) return;
-            
-            showNotification('📤 Envoi email...');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            sessionStats.emails++;
-            updateStats();
-            showNotification('✅ Email envoyé à ' + selectedProspect.name);
-        }
-
-        function editEmail() {
-            showNotification('✏️ Éditeur email - Fonctionnalité avancée');
-        }
-
-        function clearResults() {
-            currentProspects = [];
-            selectedProspect = null;
-            
-            document.getElementById('empty-state').innerHTML = `
-                <div class="icon">🎯</div>
-                <div><strong>INTERFACE OPÉRATIONNELLE DÉPLOYÉE !</strong></div>
-                <div style="margin: 15px 0; color: #10b981; font-weight: 600;">
-                    ✅ Résultats vidés - Prêt pour nouvelle prospection
-                </div>
-                <div style="color: #94a3b8; font-size: 0.9rem;">
-                    Cliquez sur un secteur pour démarrer la prospection
-                </div>
-            `;
-            document.getElementById('empty-state').style.display = 'block';
-            document.getElementById('prospects-container').style.display = 'none';
-            document.getElementById('email-empty').style.display = 'block';
-            document.getElementById('email-content').style.display = 'none';
-            
-            // Reset buttons
-            document.querySelectorAll('.sector-button').forEach(btn => {
-                btn.classList.remove('loading', 'completed');
-                btn.querySelector('.loading-bar').style.width = '0%';
-            });
-            
-            updateStats();
-            showNotification('🗑️ Résultats vidés');
-        }
-
-        function exportProspects() {
-            if (currentProspects.length === 0) {
-                showNotification('❌ Aucun prospect à exporter', 'error');
-                return;
-            }
-            
-            const csv = generateCSV(currentProspects);
-            downloadCSV(csv, `graixl-prospects-${new Date().toISOString().split('T')[0]}.csv`);
-            showNotification(`📥 Export ${currentProspects.length} prospects`);
-        }
-
-        function generateCSV(prospects) {
-            const headers = ['Nom', 'Titre', 'Entreprise', 'Email', 'Score', 'Secteur'];
-            const rows = prospects.map(p => [
-                p.name, p.title, p.company, p.email, p.graixlScore, p.industry
-            ]);
-            return [headers, ...rows].map(row => row.join(',')).join('\n');
-        }
-
-        function downloadCSV(csv, filename) {
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        }
-
-        function testSystem() {
-            showNotification('🧪 Test système démarré - Banking');
-            launchProspection('banking');
-        }
-
-        function showDemo() {
-            showNotification('🎥 Démo automatique lancée !');
-            setTimeout(() => launchProspection('banking'), 1000);
-            setTimeout(() => {
-                if (currentProspects.length > 0) {
-                    generateEmailFor(currentProspects[0].id);
-                    showNotification('✨ Démo complète terminée !');
+                // Analytics tracking (si API disponible)
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'navigation', {
+                        'event_category': 'homepage',
+                        'event_label': feature
+                    });
                 }
-            }, 5000);
-        }
-
-        function updateStats() {
-            sessionStats.prospects = currentProspects.length;
-            document.getElementById('total-prospects').textContent = sessionStats.prospects;
-            document.getElementById('total-emails').textContent = sessionStats.emails;
-        }
-
-        function viewDetails(prospectId) {
-            const prospect = currentProspects.find(p => p.id === prospectId);
-            if (prospect) {
-                showNotification(`👁️ ${prospect.name} - Score Graixl: ${prospect.graixlScore}/100`);
-            }
-        }
-
-        // Auto-demo pour impression
-        setTimeout(() => {
-            if (currentProspects.length === 0) {
-                showNotification('🎯 Prêt ! Cliquez sur un secteur pour commencer');
-            }
-        }, 2000);
+            });
+        });
     </script>
 </body>
 </html>

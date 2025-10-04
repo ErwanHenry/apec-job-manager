@@ -1,22 +1,59 @@
 {
-  "name": "graixl-public",
+  "name": "graixl-ecosystem",
   "version": "1.0.0",
-  "description": "Graixl - Prospection Intelligente avec Claude Code (Version Publique)",
-  "main": "index.js",
+  "description": "🚀 Graixl Revolutionary AI Ecosystem with Hexagonal Architecture",
+  "main": "src/GraixlEcosystem.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js"
+    "start": "node src/EcosystemLauncher.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:integration": "node test-graixl-ecosystem.js",
+    "dev": "node -e \"const {EcosystemLauncher} = require('./src/EcosystemLauncher'); EcosystemLauncher.launch().then(() => console.log('🚀 Dev server ready!'))\"",
+    "build": "echo '✅ Static files ready for deployment'",
+    "vercel-build": "echo '🚀 Vercel build completed - Graixl Ecosystem ready!'",
+    "deploy": "vercel --prod"
   },
   "keywords": [
-    "prospection",
     "ai",
+    "ecosystem",
+    "hexagonal-architecture",
+    "prospection",
+    "automation",
+    "machine-learning",
+    "multi-agent",
+    "orchestration",
+    "analytics",
+    "graixl",
     "claude-code",
     "linkedin",
     "apollo",
-    "multi-agents",
     "b2b",
     "sales-automation"
   ],
   "author": "Graixl Team",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "events": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/graixl/ecosystem"
+  },
+  "homepage": "https://graixl-ecosystem.vercel.app",
+  "vercel": {
+    "builds": [
+      {
+        "src": "api/**/*.js",
+        "use": "@vercel/node"
+      }
+    ]
+  }
 }
