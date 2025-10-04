@@ -1,0 +1,94 @@
+{
+  "name": "pan-bagnat-website-system",
+  "version": "1.0.0",
+  "description": "Multi-agent orchestration for Pan Bagnat Niçois website management",
+  "agents": {
+    "ContentCreator": {
+      "type": "worker",
+      "description": "Creates and manages blog content about Pan Bagnat",
+      "capabilities": ["content_creation", "blog_management", "seo_optimization"],
+      "tools": ["wysiwyg_editor", "content_validator", "seo_analyzer"],
+      "priority": "high",
+      "max_concurrent": 2
+    },
+    "EventManager": {
+      "type": "worker", 
+      "description": "Manages calendar events and Pan Bagnat celebrations",
+      "capabilities": ["event_creation", "calendar_management", "notification_system"],
+      "tools": ["calendar_api", "event_scheduler", "notification_sender"],
+      "priority": "medium",
+      "max_concurrent": 3
+    },
+    "ChatbotOrchestrator": {
+      "type": "worker",
+      "description": "Handles user interactions and Pan Bagnat knowledge base",
+      "capabilities": ["conversation_management", "knowledge_base", "user_engagement"],
+      "tools": ["nlp_processor", "knowledge_engine", "response_generator"],
+      "priority": "high",
+      "max_concurrent": 2
+    },
+    "QualityController": {
+      "type": "supervisor",
+      "description": "Validates content quality and cultural authenticity",
+      "capabilities": ["content_validation", "cultural_verification", "quality_assurance"],
+      "tools": ["validator", "cultural_analyzer", "quality_checker"],
+      "priority": "critical",
+      "max_concurrent": 1
+    },
+    "WebsiteOrchestrator": {
+      "type": "queen",
+      "description": "Master coordinator for all website operations",
+      "capabilities": ["workflow_management", "agent_coordination", "performance_optimization"],
+      "tools": ["workflow_engine", "performance_monitor", "resource_allocator"],
+      "priority": "critical",
+      "max_concurrent": 1
+    }
+  },
+  "workflows": {
+    "content_publication": {
+      "description": "Create and publish blog content about Pan Bagnat",
+      "agents": ["ContentCreator", "QualityController"],
+      "sequence": ["create", "validate", "publish"]
+    },
+    "event_management": {
+      "description": "Create and manage Pan Bagnat events",
+      "agents": ["EventManager", "QualityController"],
+      "sequence": ["schedule", "validate", "notify"]
+    },
+    "user_interaction": {
+      "description": "Handle user inquiries about Pan Bagnat",
+      "agents": ["ChatbotOrchestrator", "QualityController"],
+      "sequence": ["process_query", "generate_response", "validate"]
+    },
+    "full_website_management": {
+      "description": "Complete website management workflow",
+      "agents": ["WebsiteOrchestrator", "ContentCreator", "EventManager", "ChatbotOrchestrator", "QualityController"],
+      "sequence": ["coordinate", "create_content", "manage_events", "handle_interactions", "validate"]
+    }
+  },
+  "hooks": {
+    "on_content_created": "validate_and_publish",
+    "on_event_scheduled": "notify_subscribers",
+    "on_user_query": "provide_authentic_response",
+    "on_error": "retry_with_cultural_context"
+  },
+  "performance": {
+    "max_parallel_agents": 8,
+    "retry_attempts": 3,
+    "timeout_seconds": 180,
+    "rate_limits": {
+      "content_requests_per_hour": 50,
+      "event_operations_per_day": 100,
+      "chatbot_responses_per_minute": 30
+    }
+  },
+  "cultural_guidelines": {
+    "language": "fr-FR",
+    "region": "Nice, Côte d'Azur",
+    "authenticity_requirements": [
+      "Traditional Pan Bagnat ingredients only",
+      "Respect for Niçois cultural heritage",
+      "Seasonal and local product emphasis"
+    ]
+  }
+}

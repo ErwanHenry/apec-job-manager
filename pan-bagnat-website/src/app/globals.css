@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Georgia', serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-nice-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-nice-yellow hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded transition-colors;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6 border border-gray-200;
+  }
+  
+  .header-gradient {
+    background: linear-gradient(135deg, #0066CC 0%, #4A90E2 100%);
+  }
+}
