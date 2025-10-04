@@ -1,60 +1,42 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
+import { useAuth } from '@/hooks/useAuth'
+import LoginForm from '@/components/admin/LoginForm'
+import Dashboard from '@/components/admin/Dashboard'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { Save, Eye, Plus, Edit, Trash, Calendar, User } from 'lucide-react'
+import { 
+  Save, 
+  Plus, 
+  Edit, 
+  Trash, 
+  Calendar, 
+  User, 
+  LogOut,
+  BarChart3,
+  FileText,
+  Settings,
+  Image as ImageIcon,
+  Globe
+} from 'lucide-react'
+import { dataManager, type BlogPost, type Event } from '@/lib/dataManager'
 
 // Import dynamic pour éviter les erreurs SSR avec React Quill
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 import 'react-quill/dist/quill.snow.css'
 
-interface BlogPost {
-  id: string
-  title: string
-  excerpt: string
-  content: string
-  author: string
-  date: string
-  category: string
-  image: string
-  tags: string[]
-  published: boolean
-}
-
-interface Event {
-  id: string
-  title: string
-  date: string
-  time: string
-  location: string
-  description: string
-  category: 'festival' | 'atelier' | 'degustation' | 'conference'
-  maxParticipants?: number
-}
-
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<'posts' | 'events'>('posts')
+  const { isAuthenticated, isLoading, user, logout } = useAuth()
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'posts' | 'events' | 'content' | 'media'>('dashboard')
   const [isEditing, setIsEditing] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-
-  // Blog Posts State
-  const [posts, setPosts] = useState<BlogPost[]>([
-    {
-      id: '1',
-      title: 'Les Secrets d\'un Pan Bagnat Authentique',
-      excerpt: 'Découvrez les techniques traditionnelles pour préparer le parfait Pan Bagnat niçois.',
-      content: '<p>Le Pan Bagnat authentique nécessite une attention particulière à chaque détail...</p>',
-      author: 'Marie Dubois',
-      date: '2025-03-10',
-      category: 'tradition',
-      image: 'https://images.unsplash.com/photo-1539252554453-80ab65ce3586?w=600',
-      tags: ['tradition', 'recette', 'technique'],
-      published: true
-    }
-  ])
-
+  
+  // Data State
+  const [posts, setPosts] = useState<BlogPost[]>([])
+  const [events, setEvents] = useState<Event[]>([])
+  
   const [currentPost, setCurrentPost] = useState<Partial<BlogPost>>({
     title: '',
     excerpt: '',
@@ -66,20 +48,6 @@ export default function AdminPage() {
     published: false
   })
 
-  // Events State
-  const [events, setEvents] = useState<Event[]>([
-    {
-      id: '1',
-      title: 'Festival du Pan Bagnat 2025',
-      date: '2025-03-15',
-      time: '10:00 - 18:00',
-      location: 'Place Masséna, Nice',
-      description: 'Le grand rendez-vous annuel des amoureux du Pan Bagnat niçois.',
-      category: 'festival',
-      maxParticipants: 500
-    }
-  ])
-
   const [currentEvent, setCurrentEvent] = useState<Partial<Event>>({
     title: '',
     date: '',
@@ -87,8 +55,35 @@ export default function AdminPage() {
     location: '',
     description: '',
     category: 'festival',
-    maxParticipants: undefined
+    maxParticipants: undefined,
+    participants: 0
   })
+  
+  // Load data on mount
+  useEffect(() => {
+    setPosts(dataManager.getPosts())
+    setEvents(dataManager.getEvents())
+  }, [])
+
+  // Update author when user changes
+  useEffect(() => {
+    if (user && !currentPost.author) {
+      setCurrentPost(prev => ({ ...prev, author: user.username }))
+    }
+  }, [user, currentPost.author])
+  
+  // Redirect if not authenticated
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-nice-blue border-t-transparent"></div>
+      </div>
+    )
+  }
+  
+  if (!isAuthenticated) {
+    return <LoginForm onSuccess={() => window.location.reload()} />
+  }
 
   // Categories
   const postCategories = ['tradition', 'histoire', 'ingredients', 'événements', 'nutrition', 'saisons']
@@ -109,25 +104,13 @@ export default function AdminPage() {
   const handleSavePost = () => {
     if (!currentPost.title || !currentPost.content) return
 
-    const post: BlogPost = {
-      id: editingId || Date.now().toString(),
-      title: currentPost.title || '',
-      excerpt: currentPost.excerpt || '',
-      content: currentPost.content || '',
-      author: currentPost.author || 'Admin',
-      date: new Date().toISOString().split('T')[0],
-      category: currentPost.category || 'tradition',
-      image: currentPost.image || 'https://images.unsplash.com/photo-1539252554453-80ab65ce3586?w=600',
-      tags: Array.isArray(currentPost.tags) ? currentPost.tags : [],
-      published: currentPost.published || false
-    }
+    const savedPost = dataManager.savePost({
+      ...currentPost,
+      id: editingId || undefined,
+      author: currentPost.author || user?.username || 'Admin'
+    })
 
-    if (editingId) {
-      setPosts(posts.map(p => p.id === editingId ? post : p))
-    } else {
-      setPosts([...posts, post])
-    }
-
+    setPosts(dataManager.getPosts())
     resetPostForm()
   }
 
@@ -138,7 +121,10 @@ export default function AdminPage() {
   }
 
   const handleDeletePost = (id: string) => {
-    setPosts(posts.filter(p => p.id !== id))
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
+      dataManager.deletePost(id)
+      setPosts(dataManager.getPosts())
+    }
   }
 
   const resetPostForm = () => {
@@ -146,7 +132,7 @@ export default function AdminPage() {
       title: '',
       excerpt: '',
       content: '',
-      author: '',
+      author: user?.username || '',
       category: 'tradition',
       image: '',
       tags: [],
@@ -160,23 +146,12 @@ export default function AdminPage() {
   const handleSaveEvent = () => {
     if (!currentEvent.title || !currentEvent.date) return
 
-    const event: Event = {
-      id: editingId || Date.now().toString(),
-      title: currentEvent.title || '',
-      date: currentEvent.date || '',
-      time: currentEvent.time || '',
-      location: currentEvent.location || '',
-      description: currentEvent.description || '',
-      category: currentEvent.category || 'festival',
-      maxParticipants: currentEvent.maxParticipants
-    }
+    const savedEvent = dataManager.saveEvent({
+      ...currentEvent,
+      id: editingId || undefined
+    })
 
-    if (editingId) {
-      setEvents(events.map(e => e.id === editingId ? event : e))
-    } else {
-      setEvents([...events, event])
-    }
-
+    setEvents(dataManager.getEvents())
     resetEventForm()
   }
 
@@ -187,7 +162,10 @@ export default function AdminPage() {
   }
 
   const handleDeleteEvent = (id: string) => {
-    setEvents(events.filter(e => e.id !== id))
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+      dataManager.deleteEvent(id)
+      setEvents(dataManager.getEvents())
+    }
   }
 
   const resetEventForm = () => {
@@ -198,21 +176,46 @@ export default function AdminPage() {
       location: '',
       description: '',
       category: 'festival',
-      maxParticipants: undefined
+      maxParticipants: undefined,
+      participants: 0
     })
     setEditingId(null)
     setIsEditing(false)
   }
+
+  const tabs = [
+    { id: 'dashboard', label: 'Tableau de Bord', icon: BarChart3 },
+    { id: 'posts', label: 'Articles', icon: FileText },
+    { id: 'events', label: 'Événements', icon: Calendar },
+    { id: 'content', label: 'Pages', icon: Globe },
+    { id: 'media', label: 'Médias', icon: ImageIcon }
+  ]
 
   return (
     <main>
       <Header />
       
       {/* Admin Header */}
-      <section className="bg-gray-900 text-white py-8">
+      <section className="bg-gray-900 text-white py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold">Administration Pan Bagnat</h1>
-          <p className="text-gray-300 mt-2">Gestion du contenu et des événements</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Administration Pan Bagnat</h1>
+              <p className="text-gray-300 mt-1">Bienvenue {user?.username} • {user?.role}</p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-300">
+                Dernière connexion: {user?.lastLogin ? new Date(user.lastLogin).toLocaleDateString('fr-FR') : 'Première fois'}
+              </span>
+              <button
+                onClick={logout}
+                className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Déconnexion
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -221,29 +224,29 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Tabs */}
           <div className="border-b border-gray-200 mb-8">
-            <nav className="-mb-px flex space-x-8">
-              <button
-                onClick={() => setActiveTab('posts')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'posts'
-                    ? 'border-nice-blue text-nice-blue'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Articles de Blog
-              </button>
-              <button
-                onClick={() => setActiveTab('events')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'events'
-                    ? 'border-nice-blue text-nice-blue'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Événements
-              </button>
+            <nav className="-mb-px flex space-x-8 overflow-x-auto">
+              {tabs.map((tab) => {
+                const Icon = tab.icon
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'border-nice-blue text-nice-blue'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    {tab.label}
+                  </button>
+                )
+              })}
             </nav>
           </div>
+
+          {/* Dashboard */}
+          {activeTab === 'dashboard' && <Dashboard />}
 
           {/* Blog Posts Management */}
           {activeTab === 'posts' && (
@@ -459,6 +462,47 @@ export default function AdminPage() {
                       />
                     </div>
 
+                    <input
+                      type="number"
+                      placeholder="Participants actuels"
+                      value={currentEvent.participants || 0}
+                      onChange={(e) => setCurrentEvent({
+                        ...currentEvent, 
+                        participants: parseInt(e.target.value) || 0
+                      })}
+                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-nice-blue"
+                    />
+
+                    <input
+                      type="url"
+                      placeholder="URL de l'image (optionnel)"
+                      value={currentEvent.image || ''}
+                      onChange={(e) => setCurrentEvent({...currentEvent, image: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-nice-blue"
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Prix (€)"
+                        value={currentEvent.price || ''}
+                        onChange={(e) => setCurrentEvent({
+                          ...currentEvent, 
+                          price: e.target.value ? parseFloat(e.target.value) : undefined
+                        })}
+                        className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-nice-blue"
+                      />
+
+                      <input
+                        type="url"
+                        placeholder="URL d'inscription"
+                        value={currentEvent.registrationUrl || ''}
+                        onChange={(e) => setCurrentEvent({...currentEvent, registrationUrl: e.target.value})}
+                        className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-nice-blue"
+                      />
+                    </div>
+
                     <textarea
                       placeholder="Description de l&apos;événement"
                       value={currentEvent.description || ''}
@@ -482,6 +526,10 @@ export default function AdminPage() {
                         {event.date}
                       </div>
                       <p className="text-xs text-gray-600 mb-2">{event.location}</p>
+                      <div className="text-xs text-gray-500 mb-2">
+                        {event.participants || 0} participants
+                        {event.maxParticipants && ` / ${event.maxParticipants} max`}
+                      </div>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEditEvent(event)}
@@ -500,6 +548,24 @@ export default function AdminPage() {
                   ))}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Content Management - Placeholder */}
+          {activeTab === 'content' && (
+            <div className="text-center py-12">
+              <Globe className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Gestion des Pages</h3>
+              <p className="text-gray-500">Fonctionnalité en développement</p>
+            </div>
+          )}
+
+          {/* Media Management - Placeholder */}
+          {activeTab === 'media' && (
+            <div className="text-center py-12">
+              <ImageIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Gestion des Médias</h3>
+              <p className="text-gray-500">Fonctionnalité en développement</p>
             </div>
           )}
         </div>
