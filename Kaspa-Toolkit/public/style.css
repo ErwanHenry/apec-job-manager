@@ -1,0 +1,988 @@
+/* Kaspa Toolkit Deployment Manager Styles */
+:root {
+    --kaspa-blue: #0052cc;
+    --kaspa-green: #00c851;
+    --kaspa-orange: #ff8800;
+    --kaspa-red: #ff4444;
+    --kaspa-purple: #6f42c1;
+    --dark-bg: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --border-color: #404040;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #2d2d2d 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+}
+
+.app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, var(--kaspa-blue) 0%, var(--kaspa-purple) 100%);
+    padding: 1.5rem 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.milestone-counter {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+}
+
+/* Main Content */
+.main {
+    flex: 1;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Section Titles */
+.main h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--kaspa-blue);
+}
+
+/* Milestones Section */
+.milestones-section {
+    margin-bottom: 3rem;
+}
+
+.milestones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.milestone-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.milestone-card:hover {
+    transform: translateY(-2px);
+}
+
+.milestone-card.tech-freeze {
+    border-left-color: var(--kaspa-red);
+}
+
+.milestone-card.berlin-launch {
+    border-left-color: var(--kaspa-green);
+}
+
+.milestone-card.full-delivery {
+    border-left-color: var(--kaspa-blue);
+}
+
+.milestone-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.milestone-date {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.milestone-countdown {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--kaspa-orange);
+}
+
+/* Progress Section */
+.progress-section {
+    margin-bottom: 3rem;
+}
+
+.overall-progress {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.progress-circle {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: conic-gradient(var(--kaspa-green) 0deg, var(--kaspa-green) 0deg, var(--border-color) 0deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-inner {
+    width: 120px;
+    height: 120px;
+    background: var(--card-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--kaspa-green);
+}
+
+.progress-stats {
+    display: flex;
+    gap: 3rem;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--kaspa-blue);
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Tools Section */
+.tools-section {
+    margin-bottom: 3rem;
+}
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.tool-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+    border-left: 4px solid;
+}
+
+.tool-card:hover {
+    transform: translateY(-2px);
+}
+
+.tool-card.priority-high {
+    border-left-color: var(--kaspa-red);
+}
+
+.tool-card.priority-medium {
+    border-left-color: var(--kaspa-orange);
+}
+
+.tool-card.priority-low {
+    border-left-color: var(--kaspa-green);
+}
+
+.tool-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+}
+
+.tool-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.tool-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.tool-status.in_progress {
+    background: rgba(255, 136, 0, 0.2);
+    color: var(--kaspa-orange);
+}
+
+.tool-status.completed {
+    background: rgba(0, 200, 81, 0.2);
+    color: var(--kaspa-green);
+}
+
+.tool-progress {
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--kaspa-blue), var(--kaspa-green));
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+.tool-tasks {
+    margin-top: 1rem;
+}
+
+.tool-tasks h4 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.task-list {
+    list-style: none;
+}
+
+.task-list li {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.task-list li:before {
+    content: "•";
+    color: var(--kaspa-blue);
+    position: absolute;
+    left: 0;
+}
+
+.tool-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-deploy {
+    background: var(--kaspa-green);
+    color: white;
+}
+
+.btn-deploy:hover {
+    background: #00a844;
+}
+
+.btn-update {
+    background: var(--kaspa-blue);
+    color: white;
+}
+
+.btn-update:hover {
+    background: #0044aa;
+}
+
+/* Alerts Section */
+.alerts-section {
+    margin-bottom: 3rem;
+}
+
+.alerts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.alert {
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 1rem;
+    border-left: 4px solid;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.alert.critical {
+    border-left-color: var(--kaspa-red);
+}
+
+.alert.warning {
+    border-left-color: var(--kaspa-orange);
+}
+
+.alert-icon {
+    font-size: 1.2rem;
+}
+
+.alert.critical .alert-icon {
+    color: var(--kaspa-red);
+}
+
+.alert.warning .alert-icon {
+    color: var(--kaspa-orange);
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-tool {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.alert-message {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Roadmap Section */
+.roadmap-section {
+    margin-bottom: 3rem;
+}
+
+.roadmap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.roadmap-column {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.roadmap-column.now {
+    border-top: 4px solid var(--kaspa-red);
+}
+
+.roadmap-column.next {
+    border-top: 4px solid var(--kaspa-orange);
+}
+
+.roadmap-column.later {
+    border-top: 4px solid var(--kaspa-green);
+}
+
+.roadmap-column h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.roadmap-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.roadmap-task {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    border-left: 3px solid var(--kaspa-blue);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .main {
+        padding: 1rem;
+    }
+    
+    .overall-progress {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .progress-stats {
+        justify-content: center;
+    }
+    
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .roadmap-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.pulsing {
+    animation: pulse 2s infinite;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease;
+}
+
+/* Product Management Dashboard */
+.product-management-section {
+    margin-bottom: 2rem;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.product-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid var(--kaspa-blue);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.product-card h3 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+/* Launch Readiness */
+.readiness-score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.readiness-score.high {
+    color: var(--kaspa-green);
+    background: rgba(0, 200, 81, 0.1);
+}
+
+.readiness-score.medium {
+    color: var(--kaspa-orange);
+    background: rgba(255, 136, 0, 0.1);
+}
+
+.readiness-score.low {
+    color: var(--kaspa-red);
+    background: rgba(255, 68, 68, 0.1);
+}
+
+.readiness-score.critical {
+    color: var(--kaspa-red);
+    background: rgba(255, 68, 68, 0.2);
+    animation: pulse 2s infinite;
+}
+
+.readiness-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.readiness-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+}
+
+.readiness-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.readiness-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* KAS Payments Status */
+.kas-status-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.kas-status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border-left: 3px solid var(--border-color);
+}
+
+.kas-status-item.live {
+    border-left-color: var(--kaspa-green);
+}
+
+.kas-status-item.testing {
+    border-left-color: var(--kaspa-orange);
+}
+
+.kas-status-item.in_progress {
+    border-left-color: var(--kaspa-blue);
+}
+
+.kas-status-item.planning {
+    border-left-color: var(--kaspa-purple);
+}
+
+.kas-status-item.not_started {
+    border-left-color: var(--kaspa-red);
+}
+
+.kas-tool-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.kas-status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.kas-status-badge.live {
+    background: rgba(0, 200, 81, 0.2);
+    color: var(--kaspa-green);
+}
+
+.kas-status-badge.testing {
+    background: rgba(255, 136, 0, 0.2);
+    color: var(--kaspa-orange);
+}
+
+.kas-status-badge.in_progress {
+    background: rgba(0, 82, 204, 0.2);
+    color: var(--kaspa-blue);
+}
+
+.kas-status-badge.planning {
+    background: rgba(111, 66, 193, 0.2);
+    color: var(--kaspa-purple);
+}
+
+.kas-status-badge.not_started {
+    background: rgba(255, 68, 68, 0.2);
+    color: var(--kaspa-red);
+}
+
+.kas-blockers {
+    font-size: 0.7rem;
+    color: var(--kaspa-red);
+    margin-top: 0.25rem;
+}
+
+/* Marketing Readiness */
+.marketing-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.marketing-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.marketing-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.marketing-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 82, 204, 0.2);
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+/* Milestone Visual Progress Bars */
+.milestone-progress-container {
+    margin-top: 1rem;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+
+.milestone-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--kaspa-red), var(--kaspa-orange));
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.milestone-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.milestone-urgency {
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.milestone-urgency.critical {
+    background: rgba(255, 68, 68, 0.2);
+    color: var(--kaspa-red);
+    border: 1px solid var(--kaspa-red);
+    animation: pulse 2s infinite;
+}
+
+.milestone-urgency.warning {
+    background: rgba(255, 136, 0, 0.2);
+    color: var(--kaspa-orange);
+    border: 1px solid var(--kaspa-orange);
+}
+
+.milestone-urgency.normal {
+    background: rgba(0, 200, 81, 0.2);
+    color: var(--kaspa-green);
+    border: 1px solid var(--kaspa-green);
+}
+
+/* Critical Path Analytics Section */
+.critical-path-section {
+    margin-bottom: 2rem;
+}
+
+.auto-refresh-badge {
+    font-size: 0.7rem;
+    background: rgba(0, 200, 81, 0.2);
+    color: var(--kaspa-green);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    margin-left: 0.5rem;
+    font-weight: normal;
+    animation: pulse 3s infinite;
+}
+
+.critical-path-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.critical-path-card {
+    background: linear-gradient(135deg, var(--card-bg) 0%, #383838 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid var(--kaspa-blue);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.critical-path-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 82, 204, 0.4);
+}
+
+.critical-path-card h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.critical-path-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--kaspa-blue);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.critical-path-value.blocker-value {
+    color: var(--kaspa-red);
+}
+
+.critical-path-label {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.critical-path-progress-container {
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.critical-path-progress {
+    height: 100%;
+    background: linear-gradient(90deg, var(--kaspa-red), var(--kaspa-orange), var(--kaspa-green));
+    transition: width 0.5s ease;
+}
+
+.priority-tasks-mini {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    max-height: 60px;
+    overflow-y: auto;
+}
+
+.priority-task-item {
+    padding: 0.25rem;
+    margin-bottom: 0.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.blocker-impact {
+    margin-top: 0.75rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--kaspa-orange);
+    font-weight: 500;
+}
+
+.velocity-indicator {
+    margin-top: 0.75rem;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.velocity-indicator.up {
+    color: var(--kaspa-green);
+}
+
+.velocity-indicator.down {
+    color: var(--kaspa-red);
+}
+
+.velocity-indicator.stable {
+    color: var(--kaspa-orange);
+}
+
+/* Critical Blockers Section */
+.blockers-section {
+    margin-bottom: 2rem;
+}
+
+.blockers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.blocker-card {
+    background: linear-gradient(135deg, #3d1e1e 0%, var(--card-bg) 100%);
+    border-left: 4px solid var(--kaspa-red);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 15px rgba(255, 68, 68, 0.2);
+    animation: slideIn 0.3s ease;
+}
+
+.blocker-card.priority-critical {
+    border-left-width: 6px;
+    background: linear-gradient(135deg, #4d1e1e 0%, var(--card-bg) 100%);
+    animation: pulse 3s infinite;
+}
+
+.blocker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.blocker-tool {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.blocker-priority {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.blocker-priority.critical {
+    background: rgba(255, 68, 68, 0.3);
+    color: var(--kaspa-red);
+}
+
+.blocker-priority.high {
+    background: rgba(255, 136, 0, 0.3);
+    color: var(--kaspa-orange);
+}
+
+.blocker-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.blocker-impact-score {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--kaspa-orange);
+}
+
+.blocker-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-resolve {
+    background: var(--kaspa-green);
+    color: white;
+    font-size: 0.75rem;
+}
+
+.btn-resolve:hover {
+    background: #00a844;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .critical-path-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .blockers-grid {
+        grid-template-columns: 1fr;
+    }
+}

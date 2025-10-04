@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaspa Toolkit - Deployment Manager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-rocket"></i> Kaspa Community Toolkit</h1>
+                <div class="header-info">
+                    <div class="milestone-counter">
+                        <span id="current-time"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main">
+            <!-- Milestones Section -->
+            <section class="milestones-section">
+                <h2><i class="fas fa-calendar-alt"></i> Milestones Critiques</h2>
+                <div class="milestones-grid">
+                    <div class="milestone-card tech-freeze">
+                        <h3>Tech Readiness Freeze</h3>
+                        <div class="milestone-date" id="tech-freeze-date"></div>
+                        <div class="milestone-countdown" id="tech-freeze-countdown"></div>
+                        <div class="milestone-progress-container">
+                            <div class="milestone-progress-bar" id="tech-freeze-progress"></div>
+                        </div>
+                        <div class="milestone-urgency" id="tech-freeze-urgency"></div>
+                    </div>
+                    <div class="milestone-card berlin-launch">
+                        <h3>The Kaspa Experience (Berlin)</h3>
+                        <div class="milestone-date" id="berlin-launch-date"></div>
+                        <div class="milestone-countdown" id="berlin-launch-countdown"></div>
+                        <div class="milestone-progress-container">
+                            <div class="milestone-progress-bar" id="berlin-launch-progress"></div>
+                        </div>
+                        <div class="milestone-urgency" id="berlin-launch-urgency"></div>
+                    </div>
+                    <div class="milestone-card full-delivery">
+                        <h3>Full KCT Delivery</h3>
+                        <div class="milestone-date" id="full-delivery-date"></div>
+                        <div class="milestone-countdown" id="full-delivery-countdown"></div>
+                        <div class="milestone-progress-container">
+                            <div class="milestone-progress-bar" id="full-delivery-progress"></div>
+                        </div>
+                        <div class="milestone-urgency" id="full-delivery-urgency"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress Overview -->
+            <section class="progress-section">
+                <h2><i class="fas fa-chart-line"></i> Progression Globale</h2>
+                <div class="overall-progress">
+                    <div class="progress-circle">
+                        <div class="progress-inner" id="overall-progress">
+                            <span id="overall-percentage">0%</span>
+                        </div>
+                    </div>
+                    <div class="progress-stats">
+                        <div class="stat">
+                            <span class="stat-number" id="tools-ready">0</span>
+                            <span class="stat-label">Outils Prêts</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="urgent-tasks">0</span>
+                            <span class="stat-label">Tâches Urgentes</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="launch-readiness">0%</span>
+                            <span class="stat-label">Launch Readiness</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="kas-payments-ready">0/7</span>
+                            <span class="stat-label">KAS Payments</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Critical Path Analytics (Auto-Refresh) -->
+            <section class="critical-path-section">
+                <h2><i class="fas fa-route"></i> Critical Path Analytics <span class="auto-refresh-badge">Auto-Refresh: 30s</span></h2>
+                <div class="critical-path-grid">
+                    <div class="critical-path-card">
+                        <h3>⏱️ Time to Tech Freeze</h3>
+                        <div class="critical-path-value" id="days-to-freeze">-</div>
+                        <div class="critical-path-label">Days Remaining</div>
+                        <div class="critical-path-progress-container">
+                            <div class="critical-path-progress" id="freeze-time-progress"></div>
+                        </div>
+                    </div>
+                    <div class="critical-path-card">
+                        <h3>🎯 Priority Tasks</h3>
+                        <div class="critical-path-value" id="priority-tasks-count">-</div>
+                        <div class="critical-path-label">Must Complete Now</div>
+                        <div id="priority-tasks-list" class="priority-tasks-mini"></div>
+                    </div>
+                    <div class="critical-path-card">
+                        <h3>🚧 Active Blockers</h3>
+                        <div class="critical-path-value blocker-value" id="active-blockers-count">-</div>
+                        <div class="critical-path-label">Require Immediate Action</div>
+                        <div class="blocker-impact" id="blocker-impact">-</div>
+                    </div>
+                    <div class="critical-path-card">
+                        <h3>📊 Velocity Trend</h3>
+                        <div class="critical-path-value" id="velocity-trend">-</div>
+                        <div class="critical-path-label">Tasks/Week Average</div>
+                        <div class="velocity-indicator" id="velocity-indicator">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Product Management Dashboard -->
+            <section class="product-management-section">
+                <h2><i class="fas fa-chart-pie"></i> Product Management Dashboard</h2>
+                <div class="product-grid">
+                    <div class="product-card">
+                        <h3>🚀 Launch Readiness</h3>
+                        <div class="readiness-score" id="readiness-score">0%</div>
+                        <div class="readiness-details" id="readiness-details">
+                            <div class="readiness-item">
+                                <span class="readiness-label">MVP Progress:</span>
+                                <span class="readiness-value" id="mvp-progress">0%</span>
+                            </div>
+                            <div class="readiness-item">
+                                <span class="readiness-label">Must-Have Features:</span>
+                                <span class="readiness-value" id="must-have-progress">0/0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <h3>💰 KAS Payments Status</h3>
+                        <div class="kas-status-grid" id="kas-status-grid">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="product-card">
+                        <h3>📢 Marketing Readiness</h3>
+                        <div class="marketing-stats" id="marketing-stats">
+                            <div class="marketing-item">
+                                <span class="marketing-label">Copy Ready:</span>
+                                <span class="marketing-value" id="copy-ready">0/7</span>
+                            </div>
+                            <div class="marketing-item">
+                                <span class="marketing-label">Social Ready:</span>
+                                <span class="marketing-value" id="social-ready">0/7</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tools Grid -->
+            <section class="tools-section">
+                <h2><i class="fas fa-tools"></i> KCT Tools Status</h2>
+                <div class="tools-grid" id="tools-grid">
+                    <!-- Tools will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Critical Blockers Alert System -->
+            <section class="blockers-section">
+                <h2><i class="fas fa-shield-alt"></i> Critical Blockers (Auto-Prioritized)</h2>
+                <div class="blockers-grid" id="blockers-grid">
+                    <!-- Blockers will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Urgent Tasks -->
+            <section class="alerts-section">
+                <h2><i class="fas fa-exclamation-triangle"></i> Tâches Urgentes</h2>
+                <div class="alerts-container" id="alerts-container">
+                    <!-- Alerts will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Now/Next/Later Roadmap -->
+            <section class="roadmap-section">
+                <h2><i class="fas fa-road"></i> Roadmap KCT</h2>
+                <div class="roadmap-grid">
+                    <div class="roadmap-column now">
+                        <h3>Now (Tech Readiness)</h3>
+                        <div class="roadmap-tasks">
+                            <div class="roadmap-task">BlablaKAS MVP: Finalize EU capitals → Berlin presets</div>
+                            <div class="roadmap-task">KAScomodation MVP: Add event-only listing filter</div>
+                            <div class="roadmap-task">PeerMap Beta: Implement pins for members, merchants</div>
+                            <div class="roadmap-task">Kaspa Deals Beta: Core classifieds posting flow</div>
+                            <div class="roadmap-task">KasMiners MVP: Profitability calculator</div>
+                            <div class="roadmap-task">KCT Rewards v0: Set donation address</div>
+                            <div class="roadmap-task">KASvote v0: Wallet-sign poll prototype</div>
+                        </div>
+                    </div>
+                    <div class="roadmap-column next">
+                        <h3>Next (Sep 1-13)</h3>
+                        <div class="roadmap-tasks">
+                            <div class="roadmap-task">Refine UX/UI across all MVPs & Betas</div>
+                            <div class="roadmap-task">Add first test users/content</div>
+                            <div class="roadmap-task">Internal QA cycles and bug fixes</div>
+                            <div class="roadmap-task">Prepare launch comms</div>
+                        </div>
+                    </div>
+                    <div class="roadmap-column later">
+                        <h3>Later (Post-launch to Nov 10)</h3>
+                        <div class="roadmap-tasks">
+                            <div class="roadmap-task">Full L2 escrow integration</div>
+                            <div class="roadmap-task">Expand beyond Berlin presets/layer</div>
+                            <div class="roadmap-task">KAScomodation host onboarding at scale</div>
+                            <div class="roadmap-task">PeerMap global filters & categories</div>
+                            <div class="roadmap-task">Full KCT Rewards integration</div>
+                            <div class="roadmap-task">KASvote advanced polling features</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
