@@ -1,0 +1,193 @@
+{
+  "version": 2,
+  "name": "apec-job-manager",
+  "regions": ["cdg1"],
+  "framework": null,
+  "builds": [
+    {
+      "src": "dashboard/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/health",
+      "dest": "/api/health.js"
+    },
+    {
+      "src": "/api/jobs",
+      "methods": ["GET"],
+      "dest": "/api/jobs/index.js"
+    },
+    {
+      "src": "/api/jobs",
+      "methods": ["POST"],
+      "dest": "/api/jobs/create.js"
+    },
+    {
+      "src": "/api/jobs/([^/]+)",
+      "methods": ["GET"],
+      "dest": "/api/jobs/[id].js"
+    },
+    {
+      "src": "/api/jobs/([^/]+)",
+      "methods": ["PUT"],
+      "dest": "/api/jobs/update.js"
+    },
+    {
+      "src": "/api/jobs/([^/]+)",
+      "methods": ["DELETE"],
+      "dest": "/api/jobs/delete.js"
+    },
+    {
+      "src": "/api/sync",
+      "methods": ["POST"],
+      "dest": "/api/sync.js"
+    },
+    {
+      "src": "/api/sync/status",
+      "methods": ["GET"],
+      "dest": "/api/sync/status.js"
+    },
+    {
+      "src": "/api/reports",
+      "methods": ["GET", "POST"],
+      "dest": "/api/reports/index.js"
+    },
+    {
+      "src": "/api/reports/export",
+      "methods": ["POST"],
+      "dest": "/api/reports/export.js"
+    },
+    {
+      "src": "/api/stats",
+      "methods": ["GET"],
+      "dest": "/api/stats.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dashboard/dist/$1"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/((?!api).*)",
+      "destination": "/dashboard/dist/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "PRISMA_QUERY_ENGINE_LIBRARY": "/var/task/node_modules/.prisma/client/libquery_engine-rhel-openssl-1.0.x.so.node",
+    "PRISMA_CLI_QUERY_ENGINE_TYPE": "binary"
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/sync",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/daily-report",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 2 * * *"
+    }
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "api/sync.js": {
+      "memory": 3008,
+      "maxDuration": 60
+    },
+    "api/apec/**/*.ts": {
+      "memory": 3008,
+      "maxDuration": 60
+    },
+    "api/cron/*.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "api/cron/*.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+  "github": {
+    "enabled": true,
+    "autoAlias": true,
+    "autoJobCancelation": true,
+    "silent": false
+  }
+}

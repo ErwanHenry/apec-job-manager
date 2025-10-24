@@ -1,0 +1,21 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["cdg1"],
+  "functions": {
+    "app/api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+  "env": {
+    "NEXT_PUBLIC_APP_NAME": "APEC Job Manager",
+    "NEXT_PUBLIC_APP_VERSION": "2.0.0"
+  },
+  "github": {
+    "silent": false
+  }
+}

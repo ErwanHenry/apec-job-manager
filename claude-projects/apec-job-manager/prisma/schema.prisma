@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Job {
+  id            String   @id @default(uuid())
+  apecId        String   @unique
+  title         String
+  description   String?
+  location      String?
+  contractType  String?
+  salary        String?
+  requirements  String?
+  benefits      String?
+  status        JobStatus @default(DRAFT)
+  views         Int      @default(0)
+  applications  Int      @default(0)
+  publishedAt   DateTime?
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  lastSyncAt    DateTime?
+  createdAt     DateTime @default(now())
+
+  @@map("jobs")
+}
+
+model SyncHistory {
+  id            String   @id @default(uuid())
+  syncType      String
+  status        String
+  jobsCreated   Int      @default(0)
+  jobsUpdated   Int      @default(0)
+  jobsDeleted   Int      @default(0)
+  jobsUnchanged Int      @default(0)
+  errors        String[]
+  startedAt     DateTime @default(now())
+  completedAt   DateTime?
+  duration      Int?
+
+  @@map("sync_history")
+}
+
+model Report {
+  id            String   @id @default(uuid())
+  type          ReportType
+  period        String
+  startDate     DateTime
+  endDate       DateTime
+  data          Json
+  generatedAt   DateTime @default(now())
+  exportedAt    DateTime?
+  exportFormat  String?
+
+  @@map("reports")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String
+  entity      String
+  entityId    String?
+  userId      String?
+  changes     Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  PAUSED
+  EXPIRED
+  DELETED
+}
+
+enum ReportType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+}
