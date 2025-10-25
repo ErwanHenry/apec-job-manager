@@ -1,20 +1,18 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/authOptions'
+import { getAuthUser, requireAuth } from '@/lib/auth/jwt'
 import { ApecSyncService } from '@/lib/services/apecSyncService'
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const user = await getAuthUser()
 
-    // Check if user has admin role for sync operations
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
+    // Require ADMIN or SUPER_ADMIN role
+    try {
+      requireAuth(user, ['ADMIN', 'SUPER_ADMIN'])
+    } catch (error) {
       return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
+        { error: error instanceof Error ? error.message : 'Unauthorized' },
+        { status: error instanceof Error && error.message === 'Insufficient permissions' ? 403 : 401 }
       )
     }
 
@@ -44,8 +42,9 @@ export async function POST(request: Request) {
 // GET /api/jobs/sync - Get sync status
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    const user = await getAuthUser()
+
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

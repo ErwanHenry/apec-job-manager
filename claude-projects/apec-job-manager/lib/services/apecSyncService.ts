@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db/prisma'
 import { Job, JobStatus } from '@prisma/client'
-import puppeteer from 'puppeteer'
+import { apecService } from './apecServiceServerless'
 
 interface SyncResult {
   success: boolean
@@ -15,8 +15,6 @@ interface SyncResult {
 }
 
 export class ApecSyncService {
-  private browser: any = null
-
   async syncJobs(type: 'full' | 'incremental' = 'full'): Promise<SyncResult> {
     const startTime = Date.now()
     const stats = {
@@ -37,14 +35,30 @@ export class ApecSyncService {
     })
 
     try {
-      // Initialize browser
-      this.browser = await puppeteer.launch({
-        headless: process.env.PUPPETEER_HEADLESS === 'true',
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      })
+      // Initialize and authenticate with APEC
+      console.log('[ApecSyncService] Initializing APEC service...')
+      await apecService.initialize()
+      await apecService.authenticate()
 
       // Scrape jobs from APEC
-      const jobs = await this.scrapeApecJobs()
+      console.log('[ApecSyncService] Fetching jobs from APEC...')
+      const apecJobs = await apecService.getAllJobs(100) // Fetch up to 100 jobs
+
+      // Convert APEC jobs to our format
+      const jobs = apecJobs.map(apecJob => ({
+        apecId: apecJob.id,
+        title: apecJob.title,
+        description: `Status: ${apecJob.status}`,
+        location: null,
+        contractType: null,
+        salary: null,
+        status: apecJob.status === 'published' ? JobStatus.PUBLISHED : JobStatus.DRAFT,
+        views: apecJob.views,
+        applications: apecJob.applications,
+        publishedAt: apecJob.publishedDate ? new Date(apecJob.publishedDate) : null,
+      }))
+
+      console.log(`[ApecSyncService] Found ${jobs.length} jobs on APEC`)
 
       // Process each job
       for (const jobData of jobs) {
@@ -123,30 +137,11 @@ export class ApecSyncService {
 
       throw error
     } finally {
-      if (this.browser) {
-        await this.browser.close()
-      }
+      // Always close the browser
+      await apecService.close()
     }
   }
 
-  private async scrapeApecJobs(): Promise<any[]> {
-    // TODO: Implement actual APEC scraping logic
-    // This is a placeholder implementation
-    const page = await this.browser.newPage()
-
-    try {
-      await page.goto('https://www.apec.fr', {
-        waitUntil: 'networkidle2',
-        timeout: parseInt(process.env.PUPPETEER_TIMEOUT || '30000'),
-      })
-
-      // Placeholder: Return empty array for now
-      // In production, implement actual scraping logic here
-      return []
-    } finally {
-      await page.close()
-    }
-  }
 
   private jobNeedsUpdate(existing: Job, newData: any): boolean {
     return (
