@@ -20,12 +20,14 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Créer l'utilisateur admin
-    // Hash bcrypt pour "admin123": $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYfQs9kKgU6
+    // Créer l'utilisateur admin avec hash bcrypt
+    const bcrypt = require('bcryptjs')
+    const hashedPassword = await bcrypt.hash('admin123', 12)
+
     const admin = await prisma.user.create({
       data: {
         email: 'admin@example.com',
-        password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYfQs9kKgU6',
+        password: hashedPassword,
         name: 'Admin',
         role: 'ADMIN',
         emailVerified: new Date(),
