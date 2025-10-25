@@ -1,224 +1,236 @@
-# 🚀 APEC Job Manager
+# APEC Job Manager - Next.js 14
 
-> Outil d'automatisation complet pour gérer vos annonces d'emploi APEC.FR
+Application Next.js 14 moderne pour la gestion automatisée des annonces APEC.FR.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ErwanHenry/apec-job-manager&env=NEXTAUTH_URL,NEXTAUTH_SECRET,APEC_EMAIL,APEC_PASSWORD&envDescription=Variables%20d'environnement%20requises&envLink=https://github.com/ErwanHenry/apec-job-manager/blob/main/.env.example&project-name=apec-job-manager&repository-name=apec-job-manager&demo-title=APEC%20Job%20Manager&demo-description=Automatisez%20la%20gestion%20de%20vos%20annonces%20APEC&demo-url=https://apec-job-manager.vercel.app&demo-image=https://raw.githubusercontent.com/ErwanHenry/apec-job-manager/main/.github/banner.png)
+## 🚀 Technologies
 
-## ✨ Fonctionnalités
+- **Next.js 14** - App Router, Server Components, API Routes
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling avec couleurs APEC
+- **NextAuth.js** - Authentication
+- **Prisma** - ORM avec PostgreSQL
+- **Puppeteer** - Web scraping APEC
+- **Recharts** - Data visualization
+- **date-fns** - Date formatting
 
-### 🔐 Authentification Multi-Utilisateurs
-- **NextAuth.js** avec 3 rôles (Admin, Manager, User)
-- Inscription/Connexion sécurisée
-- Gestion complète des utilisateurs
-- Protection des routes par rôle
-
-### 🤖 Automatisation APEC
-- Connexion automatique à votre compte APEC entreprise
-- Création/Modification/Suppression d'annonces
-- Synchronisation automatique toutes les 6h
-- Suivi des vues et candidatures
-
-### 📊 Dashboard Complet
-- Vue d'ensemble avec statistiques en temps réel
-- Graphiques de performance (Recharts)
-- Liste des annonces avec filtres
-- Historique de synchronisation
-
-### 📈 Système de Reporting
-- Rapports quotidiens/hebdomadaires/mensuels
-- Export PDF/CSV/JSON
-- Envoi automatique par email
-- Métriques avancées (taux de conversion, etc.)
-
-### ☁️ 100% Cloud (Vercel)
-- **Vercel Postgres** - Base de données
-- **Vercel KV** - Cache Redis
-- **Vercel Blob** - Stockage fichiers
-- **Cron Jobs** - 3 tâches automatiques
-- **Edge Network** - Performance mondiale
-
-## 🚀 Déploiement Rapide (2 minutes)
-
-### Option 1: One-Click Deploy ⭐
-
-1. Cliquez sur le bouton **Deploy with Vercel** ci-dessus
-2. Remplissez 4 variables d'environnement:
-   - `NEXTAUTH_URL` - URL de votre app (auto)
-   - `NEXTAUTH_SECRET` - Générer: `openssl rand -base64 32`
-   - `APEC_EMAIL` - Votre email APEC entreprise
-   - `APEC_PASSWORD` - Votre mot de passe APEC
-3. Cliquez sur **Deploy**
-4. Attendez 2 minutes ⏱️
-5. Votre app est en ligne! 🎉
-
-### Option 2: CLI Automatisé (5 minutes)
+## 📦 Installation
 
 ```bash
-# Cloner le repo
-git clone https://github.com/ErwanHenry/apec-job-manager.git
-cd apec-job-manager
+# Installer les dépendances
+npm install
 
-# Exécuter le script de setup
-./scripts/setup-vercel.sh
+# Configurer les variables d'environnement
+cp .env.local.example .env.local
+# Éditer .env.local avec vos configurations
+
+# Générer Prisma Client
+npm run db:generate
+
+# Pousser le schéma vers la base de données
+npm run db:push
+
+# Lancer le serveur de développement
+npm run dev
 ```
 
-**Le script fait tout:**
-- ✅ Configure Vercel CLI
-- ✅ Crée Postgres, KV, Blob
-- ✅ Génère les secrets
-- ✅ Configure les variables
-- ✅ Exécute les migrations
-- ✅ Déploie en production
+L'application sera disponible sur [http://localhost:3000](http://localhost:3000)
 
-## 📖 Documentation
-
-- **[DEPLOY_NOW.md](./DEPLOY_NOW.md)** - Guide déploiement 2-5 min ⭐ Commencez ici
-- **[README_DEPLOY.md](./README_DEPLOY.md)** - Guide complet (900+ lignes)
-- **[QUICK_DEPLOY.md](./QUICK_DEPLOY.md)** - Quick start
-- **[docs/API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md)** - API Reference
-- **[docs/SERVERLESS_ARCHITECTURE.md](./docs/SERVERLESS_ARCHITECTURE.md)** - Architecture
-
-## 🔧 Stack Technique
-
-**Frontend:**
-- Next.js 14 (App Router)
-- React 18
-- TypeScript 5
-- Tailwind CSS 3
-- Recharts (graphiques)
-
-**Backend:**
-- Next.js API Routes (Serverless)
-- Prisma 5 (ORM)
-- NextAuth.js 4 (Auth)
-- Puppeteer (automation APEC)
-
-**Infrastructure:**
-- Vercel (Hosting)
-- Vercel Postgres (Database)
-- Vercel KV (Redis cache)
-- Vercel Blob (File storage)
-- Vercel Cron Jobs (Scheduled tasks)
-
-## 📂 Structure du Projet
+## 🗂️ Structure du projet
 
 ```
 apec-job-manager/
-├── next-app/                    # Application Next.js principale
-│   ├── app/                     # App Router
-│   │   ├── (auth)/             # Pages authentification
-│   │   ├── (dashboard)/        # Pages dashboard
-│   │   ├── admin/              # Admin panel
-│   │   └── api/                # API Routes
-│   ├── components/             # Composants React
-│   ├── lib/                    # Services & utils
-│   └── prisma/                 # Database schema
-├── scripts/                    # Scripts d'automatisation
-├── docs/                       # Documentation complète
-└── .github/                    # CI/CD workflows
+├── app/                          # App Router
+│   ├── (auth)/                   # Routes d'authentification
+│   │   ├── login/               # Page de connexion
+│   │   └── register/            # Page d'inscription
+│   ├── (dashboard)/             # Routes protégées
+│   │   ├── dashboard/           # Tableau de bord
+│   │   ├── jobs/                # Gestion des annonces
+│   │   ├── reports/             # Rapports
+│   │   └── settings/            # Paramètres
+│   ├── api/                     # API Routes
+│   │   ├── auth/                # NextAuth endpoints
+│   │   ├── jobs/                # CRUD annonces
+│   │   ├── reports/             # Génération rapports
+│   │   └── dashboard/           # Statistiques
+│   ├── layout.tsx               # Layout racine
+│   ├── page.tsx                 # Page d'accueil
+│   └── globals.css              # Styles globaux
+├── components/                   # Composants React
+│   ├── ui/                      # Composants UI de base
+│   │   ├── Button.tsx
+│   │   ├── Input.tsx
+│   │   └── Card.tsx
+│   ├── layout/                  # Composants de layout
+│   │   ├── Sidebar.tsx
+│   │   └── Header.tsx
+│   ├── jobs/                    # Composants annonces
+│   ├── dashboard/               # Composants dashboard
+│   │   ├── StatsCards.tsx
+│   │   ├── RecentJobs.tsx
+│   │   └── SyncHistory.tsx
+│   └── charts/                  # Composants graphiques
+├── lib/                         # Utilitaires et services
+│   ├── auth/                    # Configuration NextAuth
+│   │   └── authOptions.ts
+│   ├── db/                      # Database
+│   │   └── prisma.ts
+│   ├── services/                # Services métier
+│   │   └── apecSyncService.ts
+│   ├── types/                   # Types TypeScript
+│   │   └── index.ts
+│   └── utils/                   # Fonctions utilitaires
+├── prisma/                      # Prisma ORM
+│   └── schema.prisma            # Schéma de base de données
+├── public/                      # Assets statiques
+├── middleware.ts                # Next.js middleware (auth)
+├── next.config.js               # Configuration Next.js
+├── tailwind.config.ts           # Configuration Tailwind
+├── tsconfig.json                # Configuration TypeScript
+├── vercel.json                  # Configuration Vercel
+└── package.json                 # Dépendances
 ```
 
-## 🎯 Features par Rôle
+## 🔑 Variables d'environnement
 
-### 👤 User (Utilisateur)
-- Voir les annonces
-- Consulter les statistiques
+Voir `.env.local.example` pour la liste complète des variables requises.
 
-### 👔 Manager
-- Tout ce que User peut faire +
-- Créer/Modifier des annonces
-- Générer des rapports
-- Configurer la synchronisation
+**Essentielles:**
+- `DATABASE_URL` - PostgreSQL connection string
+- `NEXTAUTH_SECRET` - Secret pour NextAuth (générer avec `openssl rand -base64 32`)
+- `NEXTAUTH_URL` - URL de l'application
+- `APEC_EMAIL` - Email APEC
+- `APEC_PASSWORD` - Mot de passe APEC
 
-### 👑 Admin
-- Tout ce que Manager peut faire +
-- Gérer les utilisateurs
-- Changer les rôles
-- Accès aux audit logs
-- Configuration système
+## 🎨 Couleurs APEC
 
-## 🔐 Sécurité
+Le thème Tailwind inclut les couleurs officielles APEC:
 
-- ✅ **NextAuth.js** - Authentification sécurisée
-- ✅ **bcrypt** - Hash des mots de passe
-- ✅ **CSRF Protection** - Intégrée Next.js
-- ✅ **Rate Limiting** - Protection DDoS
-- ✅ **Audit Logs** - Traçabilité complète
-- ✅ **HTTPS** - Certificat SSL automatique (Vercel)
-- ✅ **Headers sécurité** - HSTS, XSS Protection, etc.
+```typescript
+apec: {
+  blue: '#0066CC',      // Bleu principal APEC
+  gray: '#53565A',      // Gris APEC
+  green: '#00A85A',     // Vert succès
+  orange: '#FF6B35',    // Orange avertissement
+  red: '#E63946',       // Rouge erreur
+}
+```
 
-## 📊 Cron Jobs Automatiques
+## 📱 Pages disponibles
 
-3 tâches planifiées sur Vercel:
+### Authentification
+- `/login` - Connexion
+- `/register` - Inscription
 
-1. **Sync APEC** - Toutes les 6h (`0 */6 * * *`)
-   - Synchronise les annonces avec APEC
-   - Met à jour vues/candidatures
+### Dashboard (protégé)
+- `/dashboard` - Tableau de bord avec statistiques
+- `/jobs` - Liste des annonces
+- `/jobs/[id]` - Détail d'une annonce
+- `/reports` - Rapports et analytics
+- `/settings` - Paramètres utilisateur
 
-2. **Rapport Quotidien** - 8h00 chaque jour (`0 8 * * *`)
-   - Génère le rapport journalier
-   - Envoie par email (optionnel)
+## 🔌 API Routes
 
-3. **Nettoyage DB** - 2h00 chaque jour (`0 2 * * *`)
-   - Supprime les anciennes données
-   - Optimise la base
+### Auth
+- `POST /api/auth/register` - Inscription
+- `GET/POST /api/auth/[...nextauth]` - NextAuth endpoints
 
-## 💰 Coûts Vercel
+### Jobs
+- `GET /api/jobs` - Liste des annonces (avec pagination et filtres)
+- `POST /api/jobs` - Créer une annonce
+- `GET /api/jobs/[id]` - Obtenir une annonce
+- `PATCH /api/jobs/[id]` - Mettre à jour une annonce
+- `DELETE /api/jobs/[id]` - Supprimer une annonce (soft delete)
+- `POST /api/jobs/sync` - Synchroniser avec APEC
+- `GET /api/jobs/sync` - Statut de synchronisation
 
-### Plan Gratuit (Hobby)
-- ❌ **1 cron job seulement** (besoin de 3)
-- ✅ Suffisant pour tester
+### Dashboard
+- `GET /api/dashboard/stats` - Statistiques du tableau de bord
 
-### Plan Pro: $20/mois ⭐ Recommandé
-- ✅ **Cron jobs illimités**
-- ✅ 1000 GB-Hours fonctions
-- ✅ 1 TB bandwidth
-- ✅ Postgres 256 MB
-- ✅ KV 256 MB
-- ✅ Support prioritaire
+### Reports
+- `GET /api/reports` - Liste des rapports
+- `POST /api/reports` - Générer un rapport
 
-## 🆘 Support & Aide
+## 🧪 Scripts NPM
 
-### Documentation
-- [Guide démarrage rapide](./DEPLOY_NOW.md)
-- [Troubleshooting](./README_DEPLOY.md#problèmes-courants)
-- [API Reference](./docs/API_DOCUMENTATION.md)
-
-### Issues
-Rencontrez un problème? [Ouvrez une issue](https://github.com/ErwanHenry/apec-job-manager/issues)
-
-### Questions
-Des questions? Consultez la [documentation complète](./README_DEPLOY.md)
-
-## 📝 Licence
-
-MIT - Libre d'utilisation
-
-## 🙏 Crédits
-
-Créé avec ❤️ en utilisant:
-- [Next.js](https://nextjs.org)
-- [Vercel](https://vercel.com)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [Claude Code](https://claude.com/claude-code)
-
----
-
-## 🚀 Prêt à démarrer?
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ErwanHenry/apec-job-manager&env=NEXTAUTH_URL,NEXTAUTH_SECRET,APEC_EMAIL,APEC_PASSWORD&project-name=apec-job-manager)
-
-**Ou suivez le guide:**
 ```bash
-git clone https://github.com/ErwanHenry/apec-job-manager.git
-cd apec-job-manager
-open DEPLOY_NOW.md
+# Développement
+npm run dev              # Lancer serveur développement
+npm run build            # Build pour production
+npm start                # Lancer serveur production
+
+# Database
+npm run db:generate      # Générer Prisma Client
+npm run db:push          # Pousser schéma vers DB
+npm run db:studio        # Ouvrir Prisma Studio
+npm run db:seed          # Seed database
+
+# Qualité
+npm run lint             # Linter Next.js
+npm run type-check       # Vérification TypeScript
+
+# Production
+npm run prepare-prod     # Préparer pour production (db:generate + build)
 ```
 
----
+## 🚢 Déploiement sur Vercel
 
-**Version:** 2.0.0
-**Status:** ✅ Production Ready
-**Dernière MAJ:** Octobre 2024
+1. Connecter le repository GitHub à Vercel
+2. Configurer les variables d'environnement dans Vercel Dashboard
+3. Déployer automatiquement sur push
+
+**Configuration Vercel:**
+- Framework: Next.js
+- Build Command: `npm run build`
+- Output Directory: `.next`
+- Install Command: `npm install`
+- Development Command: `npm run dev`
+
+**Variables d'environnement à configurer:**
+- Toutes les variables de `.env.local.example`
+- `DATABASE_URL` via Vercel Postgres integration
+
+## 🔒 Sécurité
+
+- Authentification via NextAuth.js
+- Middleware pour protéger les routes
+- Mots de passe hashés avec bcrypt
+- Headers de sécurité configurés
+- Validation des inputs avec Zod
+- Rate limiting sur API routes (à implémenter)
+
+## 📊 Fonctionnalités
+
+✅ **Implémenté:**
+- Authentification (login/register)
+- Dashboard avec statistiques
+- Liste des annonces avec pagination
+- Filtres et recherche
+- API CRUD complète
+- Protection des routes
+- UI responsive avec Tailwind
+- Thème couleurs APEC
+
+🚧 **À implémenter:**
+- Synchronisation APEC complète (scraping)
+- Génération de rapports PDF
+- Graphiques et analytics avancés
+- Notifications par email
+- Gestion des rôles avancée
+- Tests unitaires et E2E
+
+## 🤝 Contribution
+
+1. Fork le projet
+2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
+3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
+
+## 📝 License
+
+MIT
+
+## 👥 Auteurs
+
+APEC Job Manager Team

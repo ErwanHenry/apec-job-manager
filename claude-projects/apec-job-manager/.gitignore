@@ -1,46 +1,46 @@
-# Dependencies
-node_modules/
-package-lock.json
-yarn.lock
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Environment
-.env
-.env.local
-.env.production
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
 
-# Logs
-logs/
-*.log
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Database
-*.sqlite
-*.db
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma
 prisma/migrations/
 
-# Build
-dist/
-build/
-.next/
-.vercel/
+# logs
+logs/
+*.log
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Testing
-coverage/
-.nyc_output/
-
-# Temporary
-tmp/
-temp/
-screenshots/
-cookies/
-sessions/
+# exports
+exports/

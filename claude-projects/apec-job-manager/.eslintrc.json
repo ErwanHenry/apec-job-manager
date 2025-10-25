@@ -1,24 +1,6 @@
 {
-  "env": {
-    "node": true,
-    "es2021": true,
-    "jest": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "airbnb-base"
-  ],
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module"
-  },
+  "extends": ["next"],
   "rules": {
-    "no-console": "off",
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "comma-dangle": ["error", "never"],
-    "arrow-parens": ["error", "as-needed"],
-    "consistent-return": "off",
-    "no-underscore-dangle": "off",
-    "max-len": ["error", { "code": 120 }]
+    "react/no-unescaped-entities": "off"
   }
 }

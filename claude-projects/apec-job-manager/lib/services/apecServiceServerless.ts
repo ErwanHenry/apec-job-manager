@@ -154,12 +154,11 @@ class ApecServiceServerless {
               '--no-zygote',
               '--disable-setuid-sandbox',
             ],
-        defaultViewport: chromium.defaultViewport,
+        defaultViewport: { width: 1280, height: 720 },
         executablePath: isLocal
           ? process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'
           : await chromium.executablePath(),
-        headless: chromium.headless,
-        ignoreHTTPSErrors: true,
+        headless: true
       });
 
       this.page = await this.browser.newPage();

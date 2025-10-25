@@ -104,15 +104,14 @@ cd apec-job-manager
 
 ```
 apec-job-manager/
-├── next-app/                    # Application Next.js principale
-│   ├── app/                     # App Router
-│   │   ├── (auth)/             # Pages authentification
-│   │   ├── (dashboard)/        # Pages dashboard
-│   │   ├── admin/              # Admin panel
-│   │   └── api/                # API Routes
-│   ├── components/             # Composants React
-│   ├── lib/                    # Services & utils
-│   └── prisma/                 # Database schema
+├── app/                        # App Router
+│   ├── (auth)/                 # Pages authentification
+│   ├── (dashboard)/            # Pages dashboard
+│   ├── admin/                  # Admin panel
+│   └── api/                    # API Routes
+├── components/                 # Composants React
+├── lib/                        # Services & utils
+├── prisma/                     # Database schema
 ├── scripts/                    # Scripts d'automatisation
 ├── docs/                       # Documentation complète
 └── .github/                    # CI/CD workflows
