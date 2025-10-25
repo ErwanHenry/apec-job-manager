@@ -1,58 +1,40 @@
-import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token
-    const isAuth = !!token
-    const isAuthPage = req.nextUrl.pathname.startsWith('/login') ||
-                       req.nextUrl.pathname.startsWith('/register')
-    const isApiAuthRoute = req.nextUrl.pathname.startsWith('/api/auth')
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl
 
-    // Allow API auth routes
-    if (isApiAuthRoute) {
-      return NextResponse.next()
-    }
-
-    // Redirect authenticated users away from auth pages
-    if (isAuthPage && isAuth) {
-      return NextResponse.redirect(new URL('/dashboard', req.url))
-    }
-
-    // Allow authenticated users to access protected routes
-    if (isAuth) {
-      return NextResponse.next()
-    }
-
-    // Redirect unauthenticated users to login
-    if (!isAuth && !isAuthPage) {
-      let from = req.nextUrl.pathname
-      if (req.nextUrl.search) {
-        from += req.nextUrl.search
-      }
-
-      return NextResponse.redirect(
-        new URL(`/login?from=${encodeURIComponent(from)}`, req.url)
-      )
-    }
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
+  // Allow all API routes (including /api/auth)
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next()
   }
-)
+
+  // Allow auth pages
+  if (pathname.startsWith('/login') || pathname.startsWith('/register')) {
+    return NextResponse.next()
+  }
+
+  // Allow static files
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon.ico') ||
+    pathname.startsWith('/public')
+  ) {
+    return NextResponse.next()
+  }
+
+  // For now, allow all other routes (we'll handle auth in the app itself)
+  return NextResponse.next()
+}
 
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api/auth (auth API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 }
