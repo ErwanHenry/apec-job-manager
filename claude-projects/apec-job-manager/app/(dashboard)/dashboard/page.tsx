@@ -1,6 +1,7 @@
 import { StatsCards } from '@/components/dashboard/StatsCards'
 import { RecentJobs } from '@/components/dashboard/RecentJobs'
 import { SyncHistory } from '@/components/dashboard/SyncHistory'
+import { SyncButton } from '@/components/dashboard/SyncButton'
 import { prisma } from '@/lib/db/prisma'
 
 async function getDashboardStats() {
@@ -39,11 +40,16 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Vue d'ensemble de vos annonces APEC
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            Vue d'ensemble de vos annonces APEC
+          </p>
+        </div>
+        <div>
+          <SyncButton />
+        </div>
       </div>
 
       <StatsCards

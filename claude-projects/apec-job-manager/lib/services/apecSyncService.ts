@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db/prisma'
 import { Job, JobStatus } from '@prisma/client'
-import { apecService } from './apecServiceServerless'
+import { apecService } from './apecServicePlaywright'
 
 interface SyncResult {
   success: boolean
