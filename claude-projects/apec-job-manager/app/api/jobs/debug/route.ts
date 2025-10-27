@@ -61,17 +61,50 @@ export async function GET() {
         await new Promise(resolve => setTimeout(resolve, 5000))
       }
 
-      console.log('[Debug] Page loaded, capturing data...')
+      console.log('[Debug] Page loaded, waiting for job data to load...')
+
+      // Wait for possible AJAX requests to complete
+      await new Promise(resolve => setTimeout(resolve, 8000))
+
+      console.log('[Debug] Analyzing page structure...')
     } catch (navError) {
       console.error('[Debug] Navigation error:', navError)
       throw navError
     }
 
-    // Take screenshot (base64)
-    const screenshot = await page.screenshot({ encoding: 'base64', fullPage: false })
-
     // Get current URL to verify where we are
     const currentUrl = page.url()
+
+    // Try to find job listings in the DOM
+    const jobsData = await page.evaluate(() => {
+      const results: any = {
+        hasAngularApp: !!document.querySelector('[ng-app]'),
+        hasVueApp: !!document.querySelector('[id^="app"]'),
+        hasReactRoot: !!document.querySelector('[id="root"]') || !!document.querySelector('[id="__next"]'),
+
+        // Look for common patterns
+        tables: Array.from(document.querySelectorAll('table')).length,
+        lists: Array.from(document.querySelectorAll('ul, ol')).length,
+        articles: Array.from(document.querySelectorAll('article')).length,
+
+        // Look for data containers
+        dataContainers: [] as string[],
+      }
+
+      // Try to find elements that might contain job data
+      const keywords = ['offre', 'job', 'annonce', 'liste', 'table', 'grid']
+      keywords.forEach(keyword => {
+        const elements = document.querySelectorAll(`[class*="${keyword}"], [id*="${keyword}"]`)
+        if (elements.length > 0) {
+          results.dataContainers.push(`Found ${elements.length} elements with '${keyword}'`)
+        }
+      })
+
+      return results
+    })
+
+    // Take screenshot (base64)
+    const screenshot = await page.screenshot({ encoding: 'base64', fullPage: false })
 
     // Get HTML content
     const htmlContent = await page.content()
@@ -145,6 +178,7 @@ export async function GET() {
         actualUrl: currentUrl,
         screenshot: `data:image/png;base64,${screenshot}`,
         bodyText: bodyText,
+        jobsData,
         possibleSelectors,
         htmlSnippet: htmlContent.substring(0, 10000), // First 10k chars
       },
