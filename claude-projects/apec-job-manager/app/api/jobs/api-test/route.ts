@@ -40,7 +40,7 @@ export async function GET() {
         // Navigate or fetch the endpoint
         const fullUrl = `https://www.apec.fr${endpoint}`
 
-        const response = await page.evaluate(async (url) => {
+        const response = await page.evaluate(async (url: string) => {
           try {
             const res = await fetch(url, {
               method: 'GET',
