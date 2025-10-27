@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/Card'
+import { ApecImportModal } from '@/components/ApecImportModal'
 import { Job, JobStatus } from '@prisma/client'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -12,7 +13,7 @@ import clsx from 'clsx'
 import {
   MagnifyingGlassIcon,
   PlusIcon,
-  ArrowPathIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline'
 
 const statusColors = {
@@ -34,7 +35,7 @@ const statusLabels = {
 export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isSyncing, setIsSyncing] = useState(false)
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<JobStatus | ''>('')
   const [page, setPage] = useState(1)
@@ -68,33 +69,20 @@ export default function JobsPage() {
     }
   }
 
-  const handleSync = async () => {
-    setIsSyncing(true)
-    try {
-      const response = await fetch('/api/jobs/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'full' }),
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        alert('Synchronisation réussie!')
-        fetchJobs()
-      } else {
-        alert('Erreur lors de la synchronisation')
-      }
-    } catch (error) {
-      console.error('Error syncing:', error)
-      alert('Erreur lors de la synchronisation')
-    } finally {
-      setIsSyncing(false)
-    }
+  const handleImportSuccess = () => {
+    setIsImportModalOpen(false)
+    fetchJobs()
   }
 
   return (
     <div className="space-y-6">
+      {/* Import Modal */}
+      <ApecImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={handleImportSuccess}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -106,11 +94,10 @@ export default function JobsPage() {
         <div className="flex gap-3">
           <Button
             variant="secondary"
-            onClick={handleSync}
-            isLoading={isSyncing}
+            onClick={() => setIsImportModalOpen(true)}
           >
-            <ArrowPathIcon className="h-5 w-5 mr-2" />
-            Synchroniser
+            <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
+            Importer APEC
           </Button>
           <Link href="/jobs/new">
             <Button>
