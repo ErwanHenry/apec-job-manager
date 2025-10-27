@@ -17,7 +17,7 @@ En raison des limitations de l'automatisation serverless avec l'APEC, nous propo
 3. **URL** : Copier-coller ce code complet :
 
 ```javascript
-javascript:(function(){var s=document.createElement('script');s.src='https://next-nqsmo5xwg-erwan-henrys-projects.vercel.app/apec-extractor-bookmarklet.js';document.body.appendChild(s);})()
+javascript:(function(){var s=document.createElement('script');s.src='https://next-lmrcl0ank-erwan-henrys-projects.vercel.app/apec-extractor-bookmarklet.js';document.body.appendChild(s);})()
 ```
 
 ### Utilisation
@@ -56,7 +56,7 @@ Si vous préférez ne pas utiliser de bookmarklet, vous pouvez exécuter le scri
 
 ```javascript
 (async function() {
-  const response = await fetch('https://next-nqsmo5xwg-erwan-henrys-projects.vercel.app/apec-extractor-bookmarklet.js');
+  const response = await fetch('https://next-lmrcl0ank-erwan-henrys-projects.vercel.app/apec-extractor-bookmarklet.js');
   const code = await response.text();
   eval(code);
 })();
@@ -71,7 +71,7 @@ Pour une intégration personnalisée, vous pouvez envoyer les données directeme
 ### Endpoint
 
 ```
-POST https://next-nqsmo5xwg-erwan-henrys-projects.vercel.app/api/jobs/manual-import
+POST https://next-lmrcl0ank-erwan-henrys-projects.vercel.app/api/jobs/manual-import
 ```
 
 ### Headers
@@ -114,7 +114,7 @@ Content-Type: application/json
 ### Exemple cURL
 
 ```bash
-curl -X POST https://next-nqsmo5xwg-erwan-henrys-projects.vercel.app/api/jobs/manual-import \
+curl -X POST https://next-lmrcl0ank-erwan-henrys-projects.vercel.app/api/jobs/manual-import \
   -H "Content-Type: application/json" \
   -d '{
     "jobs": [
@@ -144,7 +144,7 @@ const jobs = [
   }
 ];
 
-fetch('https://next-nqsmo5xwg-erwan-henrys-projects.vercel.app/api/jobs/manual-import', {
+fetch('https://next-lmrcl0ank-erwan-henrys-projects.vercel.app/api/jobs/manual-import', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
