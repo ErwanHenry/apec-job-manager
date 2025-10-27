@@ -143,6 +143,79 @@ export class ApecSyncService {
   }
 
 
+  /**
+   * Sync jobs from manual import (e.g., bookmarklet)
+   */
+  async syncManualJobs(apecJobs: any[]): Promise<{
+    created: number
+    updated: number
+    unchanged: number
+    errors: number
+    total: number
+  }> {
+    const stats = {
+      created: 0,
+      updated: 0,
+      unchanged: 0,
+      errors: 0,
+      total: apecJobs.length,
+    }
+
+    // Convert APEC jobs to our format
+    const jobs = apecJobs.map(apecJob => ({
+      apecId: apecJob.id,
+      title: apecJob.title,
+      description: `Status: ${apecJob.status}`,
+      location: null,
+      contractType: null,
+      salary: null,
+      status: apecJob.status === 'published' ? JobStatus.PUBLISHED : JobStatus.DRAFT,
+      views: apecJob.views || 0,
+      applications: apecJob.applications || 0,
+      publishedAt: apecJob.publishedDate ? new Date(apecJob.publishedDate) : null,
+    }))
+
+    // Process each job
+    for (const jobData of jobs) {
+      try {
+        const existingJob = await prisma.job.findUnique({
+          where: { apecId: jobData.apecId },
+        })
+
+        if (existingJob) {
+          // Check if job needs update
+          const needsUpdate = this.jobNeedsUpdate(existingJob, jobData)
+          if (needsUpdate) {
+            await prisma.job.update({
+              where: { id: existingJob.id },
+              data: {
+                ...jobData,
+                lastSyncAt: new Date(),
+              },
+            })
+            stats.updated++
+          } else {
+            stats.unchanged++
+          }
+        } else {
+          // Create new job
+          await prisma.job.create({
+            data: {
+              ...jobData,
+              lastSyncAt: new Date(),
+            },
+          })
+          stats.created++
+        }
+      } catch (error) {
+        console.error(`Error processing job ${jobData.apecId}:`, error)
+        stats.errors++
+      }
+    }
+
+    return stats
+  }
+
   private jobNeedsUpdate(existing: Job, newData: any): boolean {
     return (
       existing.title !== newData.title ||
@@ -168,3 +241,6 @@ export class ApecSyncService {
     }
   }
 }
+
+// Export singleton instance
+export const apecSyncService = new ApecSyncService()

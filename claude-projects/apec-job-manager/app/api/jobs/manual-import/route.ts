@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Manual Import] Received ${jobs.length} jobs`)
 
-    // Use the same sync service to process jobs
-    const result = await apecSyncService.syncJobs(jobs)
+    // Use the manual sync method to process jobs
+    const result = await apecSyncService.syncManualJobs(jobs)
 
     console.log('[Manual Import] Sync completed:', {
       created: result.created,
