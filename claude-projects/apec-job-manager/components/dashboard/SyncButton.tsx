@@ -17,25 +17,26 @@ export function SyncButton() {
     setSuccess(false)
 
     try {
-      const response = await fetch('/api/jobs/sync', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ type: 'full' }),
+      const response = await fetch('/api/cron/sync-jobs', {
+        method: 'GET',
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || data.message || 'Erreur de synchronisation')
+        throw new Error(data.error || 'Erreur de synchronisation')
       }
 
       setSuccess(true)
       router.refresh()
 
-      // Auto-hide success message after 3 seconds
-      setTimeout(() => setSuccess(false), 3000)
+      // Show stats
+      if (data.stats) {
+        console.log('Sync completed:', data.stats)
+      }
+
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setSuccess(false), 5000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue')
     } finally {

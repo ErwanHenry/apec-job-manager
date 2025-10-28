@@ -5,12 +5,14 @@ import { prisma } from '@/lib/db/prisma'
 import { z } from 'zod'
 
 const jobSchema = z.object({
-  apecId: z.string().min(1),
-  title: z.string().min(1),
-  description: z.string().optional(),
+  apecId: z.string().optional(),
+  title: z.string().min(1, 'Le titre est requis'),
+  description: z.string().min(1, 'La description est requise'),
   location: z.string().optional(),
   contractType: z.string().optional(),
   salary: z.string().optional(),
+  experienceLevel: z.string().optional(),
+  skills: z.array(z.string()).optional(),
   requirements: z.string().optional(),
   benefits: z.string().optional(),
   status: z.enum(['DRAFT', 'PUBLISHED', 'PAUSED', 'EXPIRED', 'DELETED']).default('DRAFT'),
@@ -83,20 +85,35 @@ export async function POST(request: Request) {
     const body = await request.json()
     const validatedData = jobSchema.parse(body)
 
-    // Check if job with apecId already exists
-    const existingJob = await prisma.job.findUnique({
-      where: { apecId: validatedData.apecId },
-    })
+    // Generate apecId if not provided (for manual job creation)
+    const apecId = validatedData.apecId || `manual-${Date.now()}-${Math.random().toString(36).substring(7)}`
 
-    if (existingJob) {
-      return NextResponse.json(
-        { error: 'Une annonce avec cet ID APEC existe déjà' },
-        { status: 400 }
-      )
+    // Check if job with apecId already exists
+    if (validatedData.apecId) {
+      const existingJob = await prisma.job.findUnique({
+        where: { apecId: validatedData.apecId },
+      })
+
+      if (existingJob) {
+        return NextResponse.json(
+          { error: 'Une annonce avec cet ID APEC existe déjà' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Convert skills array to JSON string for database storage
+    const dataToCreate: any = {
+      ...validatedData,
+      apecId,
+    }
+
+    if (validatedData.skills && Array.isArray(validatedData.skills)) {
+      dataToCreate.skills = JSON.stringify(validatedData.skills)
     }
 
     const job = await prisma.job.create({
-      data: validatedData,
+      data: dataToCreate,
     })
 
     return NextResponse.json(

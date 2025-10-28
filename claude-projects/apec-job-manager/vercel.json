@@ -11,6 +11,12 @@
       "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/sync-jobs",
+      "schedule": "0 */6 * * *"
+    }
+  ],
   "env": {
     "NEXT_PUBLIC_APP_NAME": "APEC Job Manager",
     "NEXT_PUBLIC_APP_VERSION": "2.0.0"
