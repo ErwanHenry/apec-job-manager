@@ -3,6 +3,9 @@ import { apecService } from '@/lib/services/apecServicePlaywright'
 import { prisma } from '@/lib/db/prisma'
 import { JobStatus } from '@prisma/client'
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
 /**
  * Vercel Cron Job - Automatic APEC Job Sync
  *
