@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { apecService } from '@/lib/services/apecServicePlaywright'
 import { prisma } from '@/lib/db/prisma'
+import { JobStatus } from '@prisma/client'
 
 /**
  * Vercel Cron Job - Automatic APEC Job Sync
@@ -71,7 +72,7 @@ export async function GET(request: Request) {
               where: { apecId: apecJob.id },
               data: {
                 title: apecJob.title,
-                status: apecJob.status.toUpperCase(),
+                status: apecJob.status.toUpperCase() as JobStatus,
                 views: apecJob.views,
                 applications: apecJob.applications,
                 updatedAt: new Date(),
@@ -89,7 +90,7 @@ export async function GET(request: Request) {
               apecId: apecJob.id,
               title: apecJob.title,
               description: `Auto-imported from APEC on ${new Date().toLocaleDateString('fr-FR')}`,
-              status: apecJob.status.toUpperCase(),
+              status: apecJob.status.toUpperCase() as JobStatus,
               views: apecJob.views,
               applications: apecJob.applications,
               publishedAt: new Date(apecJob.publishedDate),
