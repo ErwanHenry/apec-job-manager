@@ -6,10 +6,14 @@ import { prisma } from '@/lib/db/prisma'
  * Vercel Cron Job - Automatic APEC Job Sync
  *
  * This endpoint is called automatically by Vercel Cron
- * Configuration in vercel.json
+ * Configuration in vercel.json: Runs daily at 2 AM (Hobby plan limitation)
+ *
+ * Note: Vercel Hobby accounts are limited to daily cron jobs only.
+ * For more frequent syncs (every 6h, hourly, etc.), upgrade to Pro plan.
  *
  * Can also be triggered manually via:
  * curl -X GET https://your-domain.vercel.app/api/cron/sync-jobs
+ * Or using the "Synchroniser APEC" button in the dashboard
  */
 export async function GET(request: Request) {
   const startTime = Date.now()
