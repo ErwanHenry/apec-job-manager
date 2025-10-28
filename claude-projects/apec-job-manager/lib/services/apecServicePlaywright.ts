@@ -1,14 +1,14 @@
 /**
- * APEC Service - Playwright + Serverless
+ * APEC Service - @sparticuz/chromium + Puppeteer
  *
- * Optimized for Vercel serverless environment using Playwright instead of Puppeteer
- * - playwright-core for browser automation
- * - playwright-aws-lambda for Chromium binaries
- * - Better error handling and modern API
+ * Optimized for Vercel serverless environment
+ * - puppeteer-core for browser automation
+ * - @sparticuz/chromium for Chromium binaries (modern fork of chrome-aws-lambda)
+ * - Stable and proven solution for serverless
  */
 
-import { chromium, Browser, Page, BrowserContext } from 'playwright-core'
-import chromiumPackage from 'playwright-aws-lambda'
+import puppeteer, { Browser, Page } from 'puppeteer-core'
+import chromium from '@sparticuz/chromium'
 import { kv } from '@vercel/kv'
 import crypto from 'crypto'
 
@@ -31,24 +31,25 @@ interface ApecJob {
   publishedDate: string
 }
 
+interface PuppeteerCookie {
+  name: string
+  value: string
+  domain?: string
+  path?: string
+  expires?: number
+  httpOnly?: boolean
+  secure?: boolean
+  sameSite?: 'Strict' | 'Lax' | 'None'
+}
+
 interface ApecCookies {
-  cookies: Array<{
-    name: string
-    value: string
-    domain: string
-    path: string
-    expires?: number
-    httpOnly?: boolean
-    secure?: boolean
-    sameSite?: 'Strict' | 'Lax' | 'None'
-  }>
+  cookies: PuppeteerCookie[]
   createdAt: number
   expiresAt: number
 }
 
 class ApecServicePlaywright {
   private browser: Browser | null = null
-  private context: BrowserContext | null = null
   private page: Page | null = null
   private isAuthenticated = false
   private readonly timeout = 55000 // 55s buffer
@@ -104,28 +105,43 @@ class ApecServicePlaywright {
     this.startTime = Date.now()
 
     try {
-      console.log('[ApecService] Initializing Playwright browser...')
+      console.log('[ApecService] Initializing Puppeteer browser...')
 
       const isLocal = process.env.NODE_ENV !== 'production'
 
-      // Launch browser with Playwright
-      this.browser = await chromium.launch({
-        args: isLocal
-          ? chromium.defaultArgs()
-          : chromiumPackage.args,
+      // Launch browser with Puppeteer + @sparticuz/chromium
+      const args = isLocal
+        ? ['--no-sandbox', '--disable-setuid-sandbox']
+        : [
+            ...chromium.args,
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--dns-prefetch-disable',
+          ]
+
+      this.browser = await puppeteer.launch({
+        args,
         executablePath: isLocal
-          ? process.env.PLAYWRIGHT_EXECUTABLE_PATH || '/usr/bin/chromium-browser'
-          : await chromiumPackage.executablePath,
-        headless: true,
+          ? process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'
+          : await chromium.executablePath(),
+        headless: 'shell', // Use headless shell for serverless
+        defaultViewport: {
+          width: 1280,
+          height: 720,
+        },
       })
 
-      // Create context and page
-      this.context = await this.browser.newContext({
-        viewport: { width: 1280, height: 720 },
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      })
+      this.page = await this.browser.newPage()
 
-      this.page = await this.context.newPage()
+      // Set user agent
+      await this.page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      )
+
+      // Set default timeout
       this.page.setDefaultTimeout(30000)
 
       console.log('[ApecService] Browser initialized successfully')
@@ -136,7 +152,7 @@ class ApecServicePlaywright {
   }
 
   async authenticate(forceRefresh = false): Promise<void> {
-    if (!this.page || !this.context) {
+    if (!this.page) {
       throw new Error('Browser not initialized')
     }
 
@@ -146,14 +162,15 @@ class ApecServicePlaywright {
       if (!forceRefresh) {
         const restored = await this.restoreCookies()
         if (restored) {
-          await this.page.goto('https://entreprise.apec.fr/accueil', {
+          await this.page.goto('https://www.apec.fr/recruteur.html', {
             waitUntil: 'domcontentloaded',
             timeout: 20000,
           })
 
-          const isLoggedIn = await this.page.locator('.user-menu').count() > 0
+          // Check if user menu exists (logged in)
+          const userMenu = await this.page.$('.user-menu')
 
-          if (isLoggedIn) {
+          if (userMenu) {
             this.isAuthenticated = true
             console.log('[ApecService] Authenticated using cached cookies')
             return
@@ -186,23 +203,49 @@ class ApecServicePlaywright {
     }
 
     try {
-      await this.page.goto('https://entreprise.apec.fr/accueil', {
-        waitUntil: 'networkidle',
+      await this.page.goto('https://www.apec.fr/recruteur.html', {
+        waitUntil: 'networkidle2',
         timeout: 30000,
       })
 
-      await this.page.locator('input[type="email"]').fill(email)
-      await this.page.locator('input[type="password"]').fill(password)
+      // Fill email and password (using actual APEC form selectors)
+      await this.page.waitForSelector('input#emailid', { timeout: 10000 })
+      await this.page.type('input#emailid', email)
 
-      await Promise.all([
-        this.page.locator('button[type="submit"]').click(),
-        this.page.waitForNavigation({ waitUntil: 'networkidle', timeout: 30000 }),
-      ])
+      await this.page.waitForSelector('input#password', { timeout: 10000 })
+      await this.page.type('input#password', password)
 
-      const isLoggedIn = await this.page.locator('.user-menu').count() > 0
+      // Submit form using JavaScript (bypasses clickability issues with modals)
+      await this.page.evaluate(() => {
+        const button = document.querySelector('button.popin-btn-primary') as HTMLButtonElement
+        if (button && button.textContent?.includes('Se connecter')) {
+          button.click()
+        }
+      })
+
+      // Wait for login to complete (5 seconds)
+      await new Promise(resolve => setTimeout(resolve, 5000))
+
+      // Verify login by checking if we're logged in
+      // Check multiple possible indicators of successful login
+      const isLoggedIn = await this.page.evaluate(() => {
+        // Check for user menu
+        const userMenu = document.querySelector('.user-menu')
+        if (userMenu) return true
+
+        // Check if login form is gone
+        const loginForm = document.querySelector('input#emailid')
+        if (!loginForm) return true
+
+        // Check for account/profile links
+        const accountLink = document.querySelector('[href*="compte"]') ||
+                           document.querySelector('[href*="profil"]') ||
+                           document.querySelector('[href*="dashboard"]')
+        return !!accountLink
+      })
 
       if (!isLoggedIn) {
-        throw new Error('Login verification failed - user menu not found')
+        throw new Error('Login verification failed - no logged-in indicators found')
       }
 
       this.isAuthenticated = true
@@ -212,12 +255,12 @@ class ApecServicePlaywright {
   }
 
   private async saveCookies(): Promise<void> {
-    if (!this.context) {
-      throw new Error('Browser context not initialized')
+    if (!this.page) {
+      throw new Error('Page not initialized')
     }
 
     try {
-      const cookies = await this.context.cookies()
+      const cookies = await this.page.cookies()
       const now = Date.now()
 
       const cookieData: ApecCookies = {
@@ -245,8 +288,8 @@ class ApecServicePlaywright {
   }
 
   private async restoreCookies(): Promise<boolean> {
-    if (!this.context) {
-      throw new Error('Browser context not initialized')
+    if (!this.page) {
+      throw new Error('Page not initialized')
     }
 
     try {
@@ -266,7 +309,7 @@ class ApecServicePlaywright {
         return false
       }
 
-      await this.context.addCookies(cookieData.cookies)
+      await this.page.setCookie(...cookieData.cookies)
 
       console.log('[ApecService] Cookies restored from KV')
       return true
@@ -292,25 +335,163 @@ class ApecServicePlaywright {
     try {
       console.log('[ApecService] Fetching job postings from APEC...')
 
-      await this.page!.goto('https://entreprise.apec.fr/mes-offres', {
-        waitUntil: 'networkidle',
-        timeout: 15000,
+      // Navigate to "Mes offres" page
+      await this.page!.goto('https://www.apec.fr/recruteur/mon-espace/mes-offres.html', {
+        waitUntil: 'networkidle0',
+        timeout: 20000,
       })
 
-      const jobs = await this.page!.evaluate((maxJobs) => {
-        const jobElements = document.querySelectorAll('.job-item')
-        return Array.from(jobElements).slice(0, maxJobs).map(el => ({
-          id: el.getAttribute('data-job-id') || '',
-          title: el.querySelector('.job-title')?.textContent?.trim() || '',
-          status: el.querySelector('.job-status')?.textContent?.trim() || '',
-          views: parseInt(el.querySelector('.job-views')?.textContent || '0'),
-          applications: parseInt(el.querySelector('.job-applications')?.textContent || '0'),
-          publishedDate: el.querySelector('.job-date')?.textContent?.trim() || '',
-        }))
-      }, limit)
+      // Wait for page to load completely
+      await new Promise(resolve => setTimeout(resolve, 3000))
 
-      console.log(`[ApecService] Found ${jobs.length} job postings`)
-      return jobs
+      console.log('[ApecService] Extracting jobs from page...')
+
+      // Extract jobs from page using multiple strategies
+      const jobs = await this.page!.evaluate(() => {
+        const extractedJobs: any[] = []
+
+        // Strategy 1: Look for table rows with job data
+        const tableRows = document.querySelectorAll('tr[data-job-id], tr.job-row, tbody tr')
+        tableRows.forEach((row) => {
+          try {
+            const cells = row.querySelectorAll('td')
+            if (cells.length >= 4) {
+              // Extract text from cells
+              const titleElement = row.querySelector('a, .job-title, .title')
+              const title = titleElement?.textContent?.trim() || ''
+
+              // Try to find status
+              const statusElement = row.querySelector('.status, .badge, [class*="status"]')
+              const statusText = statusElement?.textContent?.trim().toLowerCase() || ''
+
+              // Map French status to English
+              let status = 'draft'
+              if (statusText.includes('publi') || statusText.includes('en ligne')) {
+                status = 'published'
+              } else if (statusText.includes('pause')) {
+                status = 'paused'
+              } else if (statusText.includes('expir')) {
+                status = 'expired'
+              }
+
+              // Extract views and applications (look for numbers)
+              const viewsText = row.textContent || ''
+              const viewsMatch = viewsText.match(/(\d+)\s*(vue|view)/i)
+              const views = viewsMatch ? parseInt(viewsMatch[1]) : 0
+
+              const appsMatch = viewsText.match(/(\d+)\s*(candidature|application)/i)
+              const applications = appsMatch ? parseInt(appsMatch[1]) : 0
+
+              // Extract ID from data attribute or generate from title
+              const id = row.getAttribute('data-job-id') ||
+                        row.getAttribute('data-id') ||
+                        `apec-${title.substring(0, 20).replace(/\s+/g, '-')}-${Date.now()}`
+
+              // Extract date
+              const dateElement = row.querySelector('time, .date, [class*="date"]')
+              const dateText = dateElement?.getAttribute('datetime') ||
+                              dateElement?.textContent?.trim() ||
+                              new Date().toISOString().split('T')[0]
+
+              if (title && title.length > 3) {
+                extractedJobs.push({
+                  id,
+                  title,
+                  status,
+                  views,
+                  applications,
+                  publishedDate: dateText,
+                })
+              }
+            }
+          } catch (err) {
+            console.error('Error extracting job from row:', err)
+          }
+        })
+
+        // Strategy 2: Look for card/article elements if no rows found
+        if (extractedJobs.length === 0) {
+          const cards = document.querySelectorAll('article, .job-card, [class*="offer"]')
+          cards.forEach((card) => {
+            try {
+              const titleElement = card.querySelector('h2, h3, .title, a')
+              const title = titleElement?.textContent?.trim() || ''
+
+              const statusElement = card.querySelector('.status, .badge, [class*="status"]')
+              const statusText = statusElement?.textContent?.trim().toLowerCase() || ''
+
+              let status = 'draft'
+              if (statusText.includes('publi') || statusText.includes('en ligne')) {
+                status = 'published'
+              }
+
+              // Extract metrics from card
+              const cardText = card.textContent || ''
+              const viewsMatch = cardText.match(/(\d+)\s*(vue|view)/i)
+              const views = viewsMatch ? parseInt(viewsMatch[1]) : 0
+
+              const appsMatch = cardText.match(/(\d+)\s*(candidature|application)/i)
+              const applications = appsMatch ? parseInt(appsMatch[1]) : 0
+
+              const id = card.getAttribute('data-id') ||
+                        `apec-${title.substring(0, 20).replace(/\s+/g, '-')}-${Date.now()}`
+
+              if (title && title.length > 3) {
+                extractedJobs.push({
+                  id,
+                  title,
+                  status,
+                  views,
+                  applications,
+                  publishedDate: new Date().toISOString().split('T')[0],
+                })
+              }
+            } catch (err) {
+              console.error('Error extracting job from card:', err)
+            }
+          })
+        }
+
+        // Strategy 3: Try to find JSON data in page
+        if (extractedJobs.length === 0) {
+          try {
+            // Check window object for data
+            const windowData = (window as any).__INITIAL_DATA__ ||
+                              (window as any).__NEXT_DATA__ ||
+                              (window as any).pageData
+
+            if (windowData?.jobs) {
+              return windowData.jobs.map((job: any) => ({
+                id: job.id || `apec-${Date.now()}`,
+                title: job.title || job.name || '',
+                status: job.status === 'active' ? 'published' : 'draft',
+                views: job.views || 0,
+                applications: job.applications || job.candidatures || 0,
+                publishedDate: job.publishedDate || new Date().toISOString().split('T')[0],
+              }))
+            }
+          } catch (err) {
+            console.error('Error extracting from window data:', err)
+          }
+        }
+
+        return extractedJobs
+      })
+
+      console.log(`[ApecService] Successfully extracted ${jobs.length} real jobs from APEC`)
+
+      if (jobs.length === 0) {
+        console.warn('[ApecService] No jobs found - page structure may have changed')
+        // Take a screenshot for debugging
+        try {
+          const screenshot = await this.page!.screenshot({ encoding: 'base64' })
+          console.log('[ApecService] Screenshot saved for debugging (first 100 chars):', screenshot.substring(0, 100))
+        } catch (err) {
+          console.error('[ApecService] Could not take screenshot:', err)
+        }
+      }
+
+      return jobs.slice(0, Math.min(limit, jobs.length))
     } catch (error) {
       console.error('[ApecService] Failed to fetch jobs:', error)
       throw error
@@ -322,11 +503,6 @@ class ApecServicePlaywright {
       if (this.page) {
         await this.page.close()
         this.page = null
-      }
-
-      if (this.context) {
-        await this.context.close()
-        this.context = null
       }
 
       if (this.browser) {
