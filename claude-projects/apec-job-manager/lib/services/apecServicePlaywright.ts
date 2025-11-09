@@ -9,8 +9,17 @@
 
 import puppeteer, { Browser, Page } from 'puppeteer-core'
 import chromium from '@sparticuz/chromium'
-import { kv } from '@vercel/kv'
 import crypto from 'crypto'
+
+// Optional KV import - only use if configured
+let kv: any = null
+try {
+  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+    kv = require('@vercel/kv').kv
+  }
+} catch (error) {
+  console.log('[ApecService] Vercel KV not available, cookies will not be cached')
+}
 
 interface JobData {
   title: string
@@ -259,6 +268,12 @@ class ApecServicePlaywright {
       throw new Error('Page not initialized')
     }
 
+    // Skip if KV not available
+    if (!kv) {
+      console.log('[ApecService] KV not available, skipping cookie save')
+      return
+    }
+
     try {
       const cookies = await this.page.cookies()
       const now = Date.now()
@@ -292,8 +307,14 @@ class ApecServicePlaywright {
       throw new Error('Page not initialized')
     }
 
+    // Skip if KV not available
+    if (!kv) {
+      console.log('[ApecService] KV not available, skipping cookie restore')
+      return false
+    }
+
     try {
-      const encrypted = await kv.get<string>('apec:cookies:default')
+      const encrypted = (await kv.get('apec:cookies:default')) as string | null
 
       if (!encrypted) {
         console.log('[ApecService] No cached cookies found in KV')
