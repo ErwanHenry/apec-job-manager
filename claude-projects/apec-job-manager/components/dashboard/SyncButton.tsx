@@ -17,8 +17,8 @@ export function SyncButton() {
     setSuccess(false)
 
     try {
-      const response = await fetch('/api/cron/sync-jobs', {
-        method: 'GET',
+      const response = await fetch('/api/jobs/sync', {
+        method: 'POST',
       })
 
       const data = await response.json()
