@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/Card'
 import { ApecImportModal } from '@/components/ApecImportModal'
-import { Job, JobStatus } from '@prisma/client'
+import { Job } from '@prisma/client'
+import { JobStatus } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import clsx from 'clsx'
@@ -16,7 +17,7 @@ import {
   ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline'
 
-const statusColors = {
+const statusColors: Record<string, string> = {
   DRAFT: 'apec-badge-gray',
   PUBLISHED: 'apec-badge-green',
   PAUSED: 'apec-badge-orange',
@@ -24,7 +25,7 @@ const statusColors = {
   DELETED: 'apec-badge-red',
 }
 
-const statusLabels = {
+const statusLabels: Record<string, string> = {
   DRAFT: 'Brouillon',
   PUBLISHED: 'Publié',
   PAUSED: 'En pause',
@@ -41,11 +42,7 @@ export default function JobsPage() {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
-  useEffect(() => {
-    fetchJobs()
-  }, [search, statusFilter, page])
-
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     setIsLoading(true)
     try {
       const params = new URLSearchParams({
@@ -67,7 +64,11 @@ export default function JobsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [search, statusFilter, page])
+
+  useEffect(() => {
+    fetchJobs()
+  }, [fetchJobs])
 
   const handleImportSuccess = () => {
     setIsImportModalOpen(false)

@@ -1,6 +1,10 @@
-import { Job, JobStatus, ReportType, SyncHistory, Report } from '@prisma/client'
+import { Job, SyncHistory, Report } from '@prisma/client'
 
-export type { Job, JobStatus, ReportType, SyncHistory, Report }
+// Type definitions for enums that were converted to strings
+export type JobStatus = 'DRAFT' | 'PUBLISHED' | 'PAUSED' | 'EXPIRED' | 'DELETED'
+export type ReportType = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'CUSTOM'
+
+export type { Job, SyncHistory, Report }
 
 export interface DashboardStats {
   totalJobs: number

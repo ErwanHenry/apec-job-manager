@@ -279,7 +279,7 @@ class ApecServicePlaywright {
       const now = Date.now()
 
       const cookieData: ApecCookies = {
-        cookies: cookies.map(c => ({
+        cookies: cookies.map((c: any) => ({
           name: c.name,
           value: c.value,
           domain: c.domain,

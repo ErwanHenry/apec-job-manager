@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/prisma'
-import { Job, JobStatus } from '@prisma/client'
+import { Job } from '@prisma/client'
+import { JobStatus } from '@/lib/types'
 import { apecService } from './apecServicePlaywright'
 
 interface SyncResult {
@@ -52,7 +53,7 @@ export class ApecSyncService {
         location: null,
         contractType: null,
         salary: null,
-        status: apecJob.status === 'published' ? JobStatus.PUBLISHED : JobStatus.DRAFT,
+        status: apecJob.status === 'published' ? 'PUBLISHED' : 'DRAFT',
         views: apecJob.views,
         applications: apecJob.applications,
         publishedAt: apecJob.publishedDate ? new Date(apecJob.publishedDate) : null,
@@ -109,7 +110,7 @@ export class ApecSyncService {
           jobsUpdated: stats.updated,
           jobsDeleted: stats.deleted,
           jobsUnchanged: stats.unchanged,
-          errors: stats.errors,
+          errors: JSON.stringify(stats.errors),
           completedAt: new Date(),
           duration,
         },
@@ -129,7 +130,7 @@ export class ApecSyncService {
         where: { id: syncHistory.id },
         data: {
           status: 'error',
-          errors: [error instanceof Error ? error.message : 'Unknown error'],
+          errors: JSON.stringify([error instanceof Error ? error.message : 'Unknown error']),
           completedAt: new Date(),
           duration,
         },
@@ -169,7 +170,7 @@ export class ApecSyncService {
       location: null,
       contractType: null,
       salary: null,
-      status: apecJob.status === 'published' ? JobStatus.PUBLISHED : JobStatus.DRAFT,
+      status: apecJob.status === 'published' ? 'PUBLISHED' : 'DRAFT',
       views: apecJob.views || 0,
       applications: apecJob.applications || 0,
       publishedAt: apecJob.publishedDate ? new Date(apecJob.publishedDate) : null,

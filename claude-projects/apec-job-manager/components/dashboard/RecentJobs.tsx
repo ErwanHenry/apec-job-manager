@@ -9,7 +9,7 @@ interface RecentJobsProps {
   jobs: Job[]
 }
 
-const statusColors = {
+const statusColors: Record<string, string> = {
   DRAFT: 'apec-badge-gray',
   PUBLISHED: 'apec-badge-green',
   PAUSED: 'apec-badge-orange',
@@ -17,7 +17,7 @@ const statusColors = {
   DELETED: 'apec-badge-red',
 }
 
-const statusLabels = {
+const statusLabels: Record<string, string> = {
   DRAFT: 'Brouillon',
   PUBLISHED: 'Publié',
   PAUSED: 'En pause',

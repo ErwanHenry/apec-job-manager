@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -12,7 +12,7 @@ model User {
   email         String    @unique
   name          String?
   password      String
-  role          UserRole  @default(USER)
+  role          String    @default("USER")
   emailVerified DateTime?
   image         String?
   createdAt     DateTime  @default(now())
@@ -73,7 +73,7 @@ model Job {
   salary        String?
   requirements  String?
   benefits      String?
-  status        JobStatus @default(DRAFT)
+  status        String    @default("DRAFT")
   views         Int       @default(0)
   applications  Int       @default(0)
   publishedAt   DateTime?
@@ -93,7 +93,7 @@ model SyncHistory {
   jobsUpdated   Int       @default(0)
   jobsDeleted   Int       @default(0)
   jobsUnchanged Int       @default(0)
-  errors        String[]
+  errors        String?
   startedAt     DateTime  @default(now())
   completedAt   DateTime?
   duration      Int?
@@ -103,11 +103,11 @@ model SyncHistory {
 
 model Report {
   id           String     @id @default(uuid())
-  type         ReportType
+  type         String
   period       String
   startDate    DateTime
   endDate      DateTime
-  data         Json
+  data         String
   generatedAt  DateTime   @default(now())
   exportedAt   DateTime?
   exportFormat String?
@@ -121,31 +121,10 @@ model AuditLog {
   entity    String
   entityId  String?
   userId    String?
-  changes   Json?
+  changes   String?
   ipAddress String?
   userAgent String?
   createdAt DateTime @default(now())
 
   @@map("audit_logs")
-}
-
-enum UserRole {
-  USER
-  ADMIN
-  SUPER_ADMIN
-}
-
-enum JobStatus {
-  DRAFT
-  PUBLISHED
-  PAUSED
-  EXPIRED
-  DELETED
-}
-
-enum ReportType {
-  DAILY
-  WEEKLY
-  MONTHLY
-  CUSTOM
 }

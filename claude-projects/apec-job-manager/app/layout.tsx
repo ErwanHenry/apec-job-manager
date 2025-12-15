@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/Providers'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'APEC Job Manager - Gestion d\'annonces APEC',
@@ -24,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className="h-full">
-      <body className={`${inter.className} h-full bg-gray-50`}>
+      <body className="h-full bg-gray-50 font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>

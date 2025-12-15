@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -51,11 +51,7 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  useEffect(() => {
-    fetchJob()
-  }, [params.id])
-
-  const fetchJob = async () => {
+  const fetchJob = useCallback(async () => {
     try {
       const response = await fetch(`/api/jobs/${params.id}`)
       const data = await response.json()
@@ -70,7 +66,11 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [params.id])
+
+  useEffect(() => {
+    fetchJob()
+  }, [fetchJob])
 
   const handleDelete = async () => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette annonce ?')) {

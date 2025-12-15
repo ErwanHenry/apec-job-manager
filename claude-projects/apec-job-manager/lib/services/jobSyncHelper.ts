@@ -8,7 +8,7 @@
 
 import { apecService } from '@/lib/services/apecServicePlaywright'
 import { prisma } from '@/lib/db/prisma'
-import { JobStatus } from '@prisma/client'
+import { JobStatus } from '@/lib/types'
 
 interface SyncResult {
   success: boolean
