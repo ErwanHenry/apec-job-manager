@@ -1,0 +1,34 @@
+# Root level .gitignore for apec-job-manager monorepo
+
+# Dependencies
+node_modules/
+package-lock.json
+package.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+.vscode/
+.idea/
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Misc
+.vercel
