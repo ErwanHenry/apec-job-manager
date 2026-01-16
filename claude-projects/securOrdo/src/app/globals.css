@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-gray-900;
+}
+
+/* Medical theme specific styles */
+.btn-primary {
+  @apply bg-medical-blue-600 text-white hover:bg-medical-blue-700 transition-colors;
+}
+
+.btn-success {
+  @apply bg-security-green-600 text-white hover:bg-security-green-700 transition-colors;
+}
+
+.btn-danger {
+  @apply bg-alert-red-600 text-white hover:bg-alert-red-700 transition-colors;
+}
+
+.btn-warning {
+  @apply bg-warning-orange-600 text-white hover:bg-warning-orange-700 transition-colors;
+}
+
+/* Focus states for accessibility */
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-medical-blue-500;
+}
+
+/* Smooth transitions */
+* {
+  @apply transition-colors duration-200;
+}
+
+button,
+a {
+  @apply focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-medical-blue-500;
+}

@@ -1,0 +1,2 @@
+# Domain Layer - Core business logic
+# This directory contains entities, value objects, domain services, and ports
